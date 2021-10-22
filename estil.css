@@ -1,0 +1,84 @@
+.container{
+    height:max-content;
+    display:grid;
+    grid-template-rows: 170px 170px 170px 170px 170px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-areas:
+    "f g g g g g"
+    "s g g g g g"
+    "i g g g g g"
+    "t g g g g g"
+    "gl cl p p p p"
+}
+
+.Formes{
+    grid-area:f;
+    background-color:black;
+}
+
+.Transformacions{
+grid-area: s;
+background-color: blue;
+}
+
+.Imatges{
+    grid-area: i;
+    background-color:blueviolet;
+    }
+
+.TipusLinia{
+    grid-area: t;
+    background-color:brown;
+}
+
+.GruixLinia{
+    grid-area: gl;
+    background-color:burlywood;
+    }
+
+.ColorLinia{
+    grid-area: cl;
+    background-color:cadetblue;
+    }
+
+.Paterns{
+    grid-area: p;
+    background-color:chartreuse;
+    }
+
+.AreaGrafica{
+    grid-area: g;
+    background-color:crimson;
+    }
+
+.divformes{
+    display:grid;
+    width:100%;
+    height: 100%;
+    object-fit: cover;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+    "rect circ"
+    "polig trian"
+}
+
+.imagerect{
+    grid-area:rect;
+}
+.imagecir{
+    grid-area:circ;
+}
+.imagepol{
+    grid-area:polig;
+}
+.imagetri{
+    grid-area:trian;
+}
+
+.imagecir,.imagerect,.imagepol,.imagetri{
+    border:2px solid;
+    width:100%;
+    height:100%;
+    object-fit: cover;
+}
