@@ -8,9 +8,9 @@
     <link href="estil.css" rel="stylesheet" type="text/css"/>
     <script language="javascript" type="text/javascript" src="metodes.js"></script>
 </head>
-<body onmousemove="position(event);" onclick="mouseClick(event);">
+<body onmousemove="position(event);" onclick="mouseClick(event);" onload="iniciar();">
     <div class="container">
-        <div class = "divformes" class="Formes">
+        <div class="Formes">
             
                 <img class="imagerect" src="images/rectangle.jpeg">
                 <img class="imagecir" src="images/elipse.jpeg">
@@ -21,9 +21,17 @@
         <div class="Imatges"></div>
         <div class="TipusLinia"></div>
         <div class="GruixLinia"></div>
-        <div class="ColorLinia"></div>
+        <div class="ColorLinia"> 
+           <input class="ColorPicker" type="color" id="clin" value="#000000" onchange="asigColorLin(event);">
+           <label id="lbColorLinia">Color linia</label>
+           <input class="ColorPicker" type="color" id="cfarcit" value="#FFFFFF" onchange="asigColorFarcit(event);">
+           <label id="lbColorLinia">Color farcit</label>
+        </div>
         <div class="Paterns"></div>
-        <div id="areagrafica" class="AreaGrafica"></div>
+        <div id="areagrafica" class="AreaGrafica">
+            <canvas id="lienzo" width="2000" height="1000"> </canvas>    
+        </div>
+        
     </div>
     <div>
         <label id="lbInfo"></label>
