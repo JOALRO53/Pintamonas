@@ -1,12 +1,14 @@
-var posx, posy;
-var queDibuixem = 0;
-var punt1 = { x: undefined, y: undefined };
+/* Variables globals */
+var posx, posy; //Recullen posicio del ratoli quan es fa click
+var queDibuixem = 0; // 0 sense seleccio, 1 Rectangle, 2 El-lipse, 3 Poligon
+var punt1 = { x: undefined, y: undefined };//Recullen punt inicial i final de element a dibuixar
 var punt2 = { x: undefined, y: undefined };
-var canvas = undefined;
-var ctx = undefined;
-var info = undefined;
-var costats = 0;
+var canvas = undefined;// Canvas
+var ctx = undefined;// Context de canvas 
+var info = undefined;// Etiqueta pels missatges al usuari
+var costats = 0; // Per dibuixar poligons
 
+/* Assigna valors inicials */
 function iniciar() {
     canvas = document.getElementById('lienzo');
     ctx = canvas.getContext('2d');
@@ -19,41 +21,34 @@ function iniciar() {
     document.getElementById('tbCostats').addEventListener('keyup', checkEnter);
 }
 
+/* Assigna les posicions del ratoli al area grafica quan es fa click */
 function position(event) {
     posx = event.clientX - 323;
     posy = event.clientY - 9;
 }
 
+/* Assigna al context del canvas el color de linia quan es canvia la seleccio al color picker clin */
 function asigColorLin(event) {
     ctx.strokeStyle = document.getElementById('clin').value;
 }
 
+/* Assigna al context del canvas el color de farcit quan es canvia la seleccio al color picker cfarcit */
 function asigColorFarcit(event) {
     ctx.fillStyle = document.getElementById('cfarcit').value;
 }
 
-
+/* Crida al metode adequat en funcio del estat de seleccio actual i la posicio on es fa click */
 function mouseClick(event) {
+    //Si no hi ha seleccio i es fa click fora del area grafica
     if (!queDibuixem || (queDibuixem && posx <= 0) || (queDibuixem && posy > 680)) {
         seleccionarOpcio();
     }
-    else {
+    else { 
         aplicaOpcio();
     }
 }
 
-
-function asigPunt1() {
-    punt1.x = posx;
-    punt1.y = posy;
-}
-
-
-function asigPunt2() {
-    punt2.x = posx;
-    punt2.y = posy;
-}
-
+/* Assigna el nombre de opcio a dibuixar en funcio de la posicio on s'hagi fet click a l'area de seleccio */
 function seleccionarOpcio() {
     if (posx < -160 && posy < 90) {
         info.innerHTML = "Seleccionat Rectangle. Clickeu el punt inicial.";
@@ -73,6 +68,8 @@ function seleccionarOpcio() {
         queDibuixem = 0;
 }
 
+/* En funcio de la opcio abans seleccionada, obté els punts inicial i final i crida al metode per a 
+   dibuixar l'element */
 function aplicaOpcio() {
     switch (queDibuixem) {
         case 1://Rectangle
@@ -123,7 +120,18 @@ function aplicaOpcio() {
     }
 }
 
+/* Assigna les coordenades del punt inicial del element a dibuixar */
+function asigPunt1() {
+    punt1.x = posx;
+    punt1.y = posy;
+}
+/* Assigna les coordenades del punt final del element a dibuixar */
+function asigPunt2() {
+    punt2.x = posx;
+    punt2.y = posy;
+}
 
+/* Dibuixa un rectangle amb els punts superior esquerre i inferior dret */
 function drawRectangle() {
     ctx.fillRect(punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y);
     ctx.strokeRect(punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y);
@@ -131,6 +139,7 @@ function drawRectangle() {
     punt1.x = punt2.x = punt1.y = punt2.y = undefined;
 }
 
+/* Dibuixa una el-lipse tangent al rectangle format amb els punts superior esquerre i inferior dret */
 function drawElipse() {
     let start = 0;
     let end = 2 * Math.PI; // 360 grads
@@ -145,7 +154,7 @@ function drawElipse() {
     ctx.translate(centerx, centery);
     ctx.scale(scaleX, scaleY);
     ctx.beginPath();
-    ctx.arc(0, 0, width / 2, start, end, true);
+    ctx.arc(0, 0, circumference / 2, start, end, true);
     ctx.closePath();
     ctx.restore();
     ctx.stroke();
@@ -154,6 +163,8 @@ function drawElipse() {
     punt1.x = punt2.x = punt1.y = punt2.y = undefined;
 }
 
+/* Dibuixa un poligon de n costats amb el vertex superior esquerre al primer punt clicat
+   i un llarg de costat segons la distancia entre el primer punt i el segon clicat */
 function drawPoligon()
 {
     let nombrecostats = costats;
