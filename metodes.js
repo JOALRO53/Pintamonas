@@ -8,6 +8,7 @@ var canvas = undefined;// Canvas
 var ctx = undefined;// Context de canvas 
 var info = undefined;// Etiqueta pels missatges al usuari
 var costats = 0; // Per dibuixar poligons
+var graus = 0; // Per a els girs
 var gruixlin = 1; // Gruix de linia
 var fontsize = 13; //Mida de font
 var copia = undefined; // Contingut de la copia d'una finestra ( array de pixels)
@@ -25,6 +26,7 @@ function iniciar() {
     info = document.getElementById('lbInfo');
     document.getElementById('tbCostats').value = '';
     document.getElementById('tbCostats').addEventListener('keyup', checkEnter);
+    document.getElementById('tbGraus').addEventListener('keyup', checkGraus);
     document.getElementById('lbGruix').innerText = gruixlin;
     document.getElementById('tipotxt').value = "Normal";
 }
@@ -146,6 +148,12 @@ function seleccionarOpcio() {
         info.innerHTML = "Seleccionat escala. Clickeu el punt superior esquerre de la finestra a escalar."
         queDibuixem = 7; // Escalat d'una finestra.
     }
+    else if (posx < -188 && posy > 258 && posy < 339) {
+        document.getElementById("tbGraus").hidden = false;
+        document.getElementById("tbGraus").focus();
+        info.innerHTML = "Seleccionat gir. Introduiu la quantitat de graus i clickeu el punt superior esquerre de la finestra a girar."
+        queDibuixem = 8; // Gir d'una finestra.
+    }
     else
         queDibuixem = 0;
 }
@@ -242,18 +250,39 @@ function aplicaOpcio() {
             }
             break;
         case 7://Escala una finestra
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a escalar.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                //copiaFinestra();
+                escalaFinestra();
+                info.innerHTML = "Finestra escalada al doble.";
+                reset();
+            }
+            break
+        case 8: //Gir d'una finestra
         if (posx > 0 && punt1.x == undefined)// Click en area grafica
-        {
-            asigPunt1();
-            info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a escalar.";
-        }
-        else if (punt1.x && !punt2.x) {
-            asigPunt2();
-            copiaFinestra();
-            escalaFinestra();
-            info.innerHTML = "Finestra escalada al doble.";
-            reset();
-        }
+            {
+                if (graus == 0) {
+                    alert("Quantitat de graus no introduida o zero.Introduïu-la primer.")
+                    reset();
+                    document.getElementById('tbGraus').hidden = true;
+                    return;
+                }
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a girar.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                copiaFinestra();
+                giraFinestra();
+                info.innerHTML = "Finestra girada.";
+                reset();
+            }
+            break
     }
 }
 
@@ -378,6 +407,19 @@ function checkEnter(e) {
         }
     }
 }
+/* Comproba que s'introdueix un nombre correcte de graus per a fer el gir i converteix de graus decimals a radians */
+function checkGraus(e) {
+
+    if (e.key === 'Enter' || e.keyCode === 13) {
+        let ngraus = document.getElementById('tbGraus').value;
+        if (isNaN(ngraus) || ngraus > 360)
+            alert("Quantitat de graus no vàlida. Introuïu no més nombres menors a 360");
+        else {
+            graus = ngraus * Math.PI / 180;
+            document.getElementById('tbGraus').hidden = true;
+        }
+    }
+}
 
 /* Dibuixa una linia */
 function drawLinia() {
@@ -389,30 +431,50 @@ function drawLinia() {
     reset();
 }
 
-function copiaFinestra()
-{
-    copia = ctx.getImageData(punt1.x,punt1.y,punt2.x-punt1.x,punt2.y-punt1.y);
+function copiaFinestra() {
+    copia = ctx.getImageData(punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y);
 }
 
-function enganxaCopia()
-{
-   ctx.putImageData(copia,punt3.x,punt3.y);
+function enganxaCopia() {
+    ctx.putImageData(copia, punt3.x, punt3.y);
 }
 
-function escalaFinestra()
-{
+function escalaFinestra() {
     let canvasocult = document.createElement('canvas');
     canvasocult.style.display = 'none';
     document.body.appendChild(canvasocult);
-    canvasocult.width = (punt2.x-punt1.x)*2;
-    canvasocult.height = (punt2.y-punt1.y)*2;
+    canvasocult.width = (punt2.x - punt1.x) * 2;
+    canvasocult.height = (punt2.y - punt1.y) * 2;
     let ctxocult = canvasocult.getContext('2d');
-    ctxocult.drawImage(canvas,punt1.x,punt1.y,punt2.x-punt1.x,punt2.y-punt1.y,0,0,canvasocult.width,canvasocult.height);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
     let fitxer = canvasocult.toDataURL("image/png").replace("image/png", "image/octet-stream");
     let imag = new Image;
-    ctx.drawImage(imag,0,0);
+    ctx.drawImage(imag, 0, 0);
     imag.src = fitxer;
-    ctxocult.drawImage(imag,punt1.x,punt1.y);
-    ctx.clearRect(punt1.x,punt1.y,canvasocult.width,canvasocult.height);
-    ctx.drawImage(canvasocult,punt1.x,punt1.y);
+    ctxocult.drawImage(imag, punt1.x, punt1.y);
+    ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
+    ctx.drawImage(canvasocult, punt1.x, punt1.y);
+}
+
+function giraFinestra()
+{
+    //ctx.save();
+    let canvasocult = document.createElement('canvas');
+    canvasocult.style.display = 'none';
+    document.body.appendChild(canvasocult);
+    canvasocult.width = (punt2.x - punt1.x)*2;
+    canvasocult.height = (punt2.y - punt1.y)*2;
+    let ctxocult = canvasocult.getContext('2d');
+    ctxocult.scale(0.5,0.5);
+    ctxocult.translate(canvasocult.width,0);
+    ctxocult.rotate(graus);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    let fitxer = canvasocult.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    let imag = new Image;
+    ctx.drawImage(imag, 0, 0);
+    imag.src = fitxer;
+    ctxocult.drawImage(imag, punt1.x, punt1.y);
+    ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
+    ctx.drawImage(canvasocult, punt1.x, punt1.y);
+    graus = 0;
 }

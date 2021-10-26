@@ -124,7 +124,7 @@
     grid-area: g;
     }
 
-#tbCostats{
+#tbCostats,#tbGraus{
     font-size:23px;
     width:30px;
     height:auto;
