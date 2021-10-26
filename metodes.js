@@ -1,12 +1,17 @@
 /* Variables globals */
 var posx, posy; //Recullen posicio del ratoli quan es fa click
-var queDibuixem = 0; // 0 sense seleccio, 1 Rectangle, 2 El-lipse, 3 Poligon
+var queDibuixem = 0; // 0 sense seleccio, 1 Rectangle, 2 El-lipse, 3 Poligon, 4 Linia
 var punt1 = { x: undefined, y: undefined };//Recullen punt inicial i final de element a dibuixar
 var punt2 = { x: undefined, y: undefined };
+var punt3 = { x: undefined, y: undefined };
 var canvas = undefined;// Canvas
 var ctx = undefined;// Context de canvas 
 var info = undefined;// Etiqueta pels missatges al usuari
 var costats = 0; // Per dibuixar poligons
+var gruixlin = 1; // Gruix de linia
+var fontsize = 13; //Mida de font
+var copia = undefined; // Contingut de la copia d'una finestra ( array de pixels)
+
 
 /* Assigna valors inicials */
 function iniciar() {
@@ -14,17 +19,21 @@ function iniciar() {
     ctx = canvas.getContext('2d');
     ctx.strokeStyle = "black";
     ctx.fillStyle = "white";
+    ctx.font = "normal Arial 13";
     document.getElementById('clin').value = "#000000";
     document.getElementById('cfarcit').value = "#FFFFFF";
     info = document.getElementById('lbInfo');
     document.getElementById('tbCostats').value = '';
     document.getElementById('tbCostats').addEventListener('keyup', checkEnter);
+    document.getElementById('lbGruix').innerText = gruixlin;
+    document.getElementById('tipotxt').value = "Normal";
 }
 
-/* Assigna les posicions del ratoli al area grafica quan es fa click */
+/* Assigna les coordenades de posicio del ratoli al area grafica quan es fa click */
 function position(event) {
-    posx = event.clientX - 323;
-    posy = event.clientY - 9;
+    posx = event.clientX - 385;
+    posy = event.clientY - 8;
+    //info.innerHTML = "X: " + posx + " Y: " + posy;
 }
 
 /* Assigna al context del canvas el color de linia quan es canvia la seleccio al color picker clin */
@@ -37,20 +46,73 @@ function asigColorFarcit(event) {
     ctx.fillStyle = document.getElementById('cfarcit').value;
 }
 
+/* Reseteja les seleccions actuals */
+function reset() {
+    queDibuixem = 0;
+    punt1.x = punt2.x = punt1.y = punt2.y = undefined;
+}
+
+/* Augmenta el gruix de linia quan es prem el botó + */
+function incrementGl() {
+    gruixlin++;
+    document.getElementById('lbGruix').innerText = gruixlin;
+    ctx.lineWidth = gruixlin;
+}
+
+/* Redueix el gruix de linia quan es prem el botó - */
+function decrementGl() {
+    if (gruixlin > 1)
+        gruixlin--;
+    document.getElementById('lbGruix').innerText = gruixlin;
+    ctx.lineWidth = gruixlin;
+}
+
+/*Augmenta la mida de la font quan es prem el botó + */
+function incrementFs() {
+    fontsize++;
+    document.getElementById('midatxt').innerText = fontsize;
+    ctx.font = fontsize + "px Arial";
+}
+
+/* Redueix la mida de la font quan es prem el botó - */
+function decrementFs() {
+    if (fontsize > 1)
+        fontsize--;
+    document.getElementById('midatxt').innerText = fontsize;
+    ctx.font = fontsize + "px Arial";
+}
+
+/* Canvia l'estil de linia del canvas quan es selecciona al desplegable */
+function tipolinChanged() {
+    let tipolin = document.getElementById('tipolin').value;
+    switch (tipolin) {
+        case "Continua":
+            ctx.setLineDash([]);
+            break;
+        case "Discontinua":
+            ctx.setLineDash([5, 10]);
+            break;
+        case "Linia punt":
+            ctx.setLineDash([5, 10, 2]);
+            break;
+    }
+}
+
 /* Crida al metode adequat en funcio del estat de seleccio actual i la posicio on es fa click */
 function mouseClick(event) {
     //Si no hi ha seleccio i es fa click fora del area grafica
     if (!queDibuixem || (queDibuixem && posx <= 0) || (queDibuixem && posy > 680)) {
         seleccionarOpcio();
     }
-    else { 
+    else {
         aplicaOpcio();
     }
 }
 
 /* Assigna el nombre de opcio a dibuixar en funcio de la posicio on s'hagi fet click a l'area de seleccio */
 function seleccionarOpcio() {
-    if (posx < -160 && posy < 90) {
+    document.getElementById("tbCostats").hidden = true;
+    if (posx < -188 && posy < 85) {
         info.innerHTML = "Seleccionat Rectangle. Clickeu el punt inicial.";
         queDibuixem = 1; //Rectangle seleccionat
     }
@@ -58,11 +120,31 @@ function seleccionarOpcio() {
         info.innerHTML = "Seleccionada El-lipse. Clickeu el punt inicial.";
         queDibuixem = 2; //El-lipse seleccionada
     }
-    else if (posx < -160 && posy > 90 && posy < 180) {
+    else if (posx < -188 && posy > 90 && posy < 180) {
         info.innerHTML = "Seleccionat Poligon. Introduïu nombre de costats i clickeu posició del vertex superior esquerre.";
         document.getElementById("tbCostats").hidden = false;
         document.getElementById("tbCostats").focus();
         queDibuixem = 3; //Poligon seleccionat
+    }
+    else if (posx > -160 && posx < 1 && posy > 90 && posy < 168) {
+        info.innerHTML = "Seleccionada línia. Clickeu el punt inicial.";
+        queDibuixem = 4; //Linia
+    }
+    else if (posx > 378 && posx < 508 && posy > 485) {
+        if (ctx.fillStyle == "#ffffff")
+            ctx.fillStyle = "black";
+        info.innerHTML = "Seleccionat text. Escriviu el text i clickeu el punt d'inserció.";
+        document.getElementById('tbText').hidden = false;
+        document.getElementById('tbText').focus();
+        queDibuixem = 5; //Text
+    }
+    else if (posx < -188 && posy > 175 && posy < 255) {
+        info.innerHTML = "Seleccionat copia. Clickeu el punt superior esquerre de la finestra a copiar."
+        queDibuixem = 6; // Copia d'una finestra.
+    }
+    else if (posx > -188 && posy > 175 && posy < 255) {
+        info.innerHTML = "Seleccionat escala. Clickeu el punt superior esquerre de la finestra a escalar."
+        queDibuixem = 7; // Escalat d'una finestra.
     }
     else
         queDibuixem = 0;
@@ -99,12 +181,11 @@ function aplicaOpcio() {
         case 3://Poligon
             if (posx > 0 && punt1.x == undefined)// Click en area grafica
             {
-                if(costats == 0)
-                {
+                if (costats == 0) {
                     alert("Quantitat de costats no introduida.Introduïu-la primer.")
                     queDibuixem = 0;
                     punt1.x = punt2.x = punt1.y = punt2.y = undefined;
-                    info.innerHTML="";
+                    info.innerHTML = "";
                     document.getElementById('tbCostats').hidden = true;
                     return;
                 }
@@ -117,6 +198,62 @@ function aplicaOpcio() {
                 info.innerHTML = "Dibuixat poligon.";
             }
             break;
+        case 4://Linia
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt final de la línia.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                drawLinia();
+                info.innerHTML = "Dibuixada línia.";
+            }
+            break;
+        case 5://Text
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                asigPunt1();
+                let texto = document.getElementById('tbText').value;
+                ctx.font = document.getElementById('tipotxt').value + " " + fontsize + "px Arial";
+                ctx.fillText(texto, punt1.x, punt1.y);
+                info.innerHTML = "Dibuixat text";
+                document.getElementById('tbText').value = '';
+                document.getElementById('tbText').hidden = true;
+                reset();
+            }
+            break;
+        case 6://Copia d'una finestra
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a copiar.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                copiaFinestra();
+                info.innerHTML = "Clikeu el punt de inserció de la copia.";
+            }
+            else if (punt1.x && punt2.x && !punt3.x) {
+                asigPunt3();
+                enganxaCopia();
+                info.innerHTML = "Finestra copiada.";
+                reset();
+            }
+            break;
+        case 7://Escala una finestra
+        if (posx > 0 && punt1.x == undefined)// Click en area grafica
+        {
+            asigPunt1();
+            info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a escalar.";
+        }
+        else if (punt1.x && !punt2.x) {
+            asigPunt2();
+            copiaFinestra();
+            escalaFinestra();
+            info.innerHTML = "Finestra escalada al doble.";
+            reset();
+        }
     }
 }
 
@@ -131,12 +268,17 @@ function asigPunt2() {
     punt2.y = posy;
 }
 
+/* Assigna les coordenades del punt final del element a dibuixar */
+function asigPunt3() {
+    punt3.x = posx;
+    punt3.y = posy;
+}
+
 /* Dibuixa un rectangle amb els punts superior esquerre i inferior dret */
 function drawRectangle() {
     ctx.fillRect(punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y);
     ctx.strokeRect(punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y);
-    queDibuixem = 0;
-    punt1.x = punt2.x = punt1.y = punt2.y = undefined;
+    reset();
 }
 
 /* Dibuixa una el-lipse tangent al rectangle format amb els punts superior esquerre i inferior dret */
@@ -159,32 +301,29 @@ function drawElipse() {
     ctx.restore();
     ctx.stroke();
     ctx.fill();
-    queDibuixem = 0;
-    punt1.x = punt2.x = punt1.y = punt2.y = undefined;
+    reset();
 }
 
 /* Dibuixa un poligon de n costats amb el vertex superior esquerre al primer punt clicat
    i un llarg de costat segons la distancia entre el primer punt i el segon clicat */
-function drawPoligon()
-{
+function drawPoligon() {
     let nombrecostats = costats;
-    let angle = 2*Math.PI/nombrecostats;
-    let costat = Math.sqrt(Math.pow(punt2.x - punt1.x,2) + Math.pow(punt2.y-punt1.y,2));
+    let angle = 2 * Math.PI / nombrecostats;
+    let costat = Math.sqrt(Math.pow(punt2.x - punt1.x, 2) + Math.pow(punt2.y - punt1.y, 2));
     ctx.save();
-    ctx.translate(0,0);
+    ctx.translate(0, 0);
     let anterior = new Object();
     anterior.x = punt1.x;
     anterior.y = punt1.y;
     ctx.beginPath();
-    ctx.moveTo(punt1.x,punt1.y);
-    let vector = { i:1,j:0}; // Vector de direccció inicial
+    ctx.moveTo(punt1.x, punt1.y);
+    let vector = { i: 1, j: 0 }; // Vector de direccció inicial
     let angleacumulat = angle;
-    for(let i=1; i < nombrecostats;i++)
-    {
+    for (let i = 1; i < nombrecostats; i++) {
         let seguent = new Object();
         seguent.x = anterior.x + vector.i * costat;
         seguent.y = anterior.y + vector.j * costat;
-        ctx.lineTo(seguent.x,seguent.y);
+        ctx.lineTo(seguent.x, seguent.y);
         vector = calcularVector(angleacumulat);
         angleacumulat += angle;
         anterior = seguent;
@@ -192,35 +331,33 @@ function drawPoligon()
     ctx.closePath();
     ctx.stroke();
     ctx.fill();
-    queDibuixem = 0;
-    punt1.x = punt2.x = punt1.y = punt2.y = undefined;
+    reset();
     document.getElementById('tbCostats').value = '';
     costats = 0;
     ctx.restore();
 }
 
-
-function calcularVector(angle)
-{
+/* Retorna un vector de direccio ( unitari ) en funcio del angle passat com a argument */
+function calcularVector(angle) {
     vector = new Object();
-    if(Math.PI/2 >= angle) // Angle menor de 90º
+    if (Math.PI / 2 >= angle) // Angle menor de 90º
     {
         vector.i = Math.cos(angle);
         vector.j = Math.sin(angle);
     }
-    else if(Math.PI/2 < angle < Math.PI) //Angle mes gran de 90º i menor de 180º
+    else if (Math.PI / 2 < angle < Math.PI) //Angle mes gran de 90º i menor de 180º
     {
-        let complementario = Math.PI-angle;
+        let complementario = Math.PI - angle;
         vector.i = -Math.cos(complementario);
         vector.j = Math.sin(complementario);
     }
-    else if(Math.PI < angle < Math.PI * 3 / 2) // Angle mes gran de 180º i menor a 270º
+    else if (Math.PI < angle < Math.PI * 3 / 2) // Angle mes gran de 180º i menor a 270º
     {
-        let complementario = (Math.PI*3/2) - angle;
+        let complementario = (Math.PI * 3 / 2) - angle;
         vector.i = -Math.sin(complementario);
         vector.j = -Math.cos(complementario);
     }
-    else if(angle > Math.PI*3/2) // Angle mes gran de 270º
+    else if (angle > Math.PI * 3 / 2) // Angle mes gran de 270º
     {
         vector.i = Math.cos(angle);
         vector.j = -Math.sin(angle);
@@ -228,20 +365,54 @@ function calcularVector(angle)
     return vector;
 }
 
+/* Comproba que s'introdueix un nombre correcte de costats per a dibuixar un poligon */
+function checkEnter(e) {
 
-
-function checkEnter(e)
-{
-    
     if (e.key === 'Enter' || e.keyCode === 13) {
         let ncostats = document.getElementById('tbCostats').value;
-        if(isNaN(ncostats) || ncostats < 3)
+        if (isNaN(ncostats) || ncostats < 3)
             alert("Quantitat de costats no vàlida. Introuïu no més nombres enters més grans que 2");
-        else
-        {
-            costats = ncostats;   
+        else {
+            costats = ncostats;
             document.getElementById('tbCostats').hidden = true;
         }
     }
-    
+}
+
+/* Dibuixa una linia */
+function drawLinia() {
+    ctx.beginPath();
+    ctx.moveTo(punt1.x, punt1.y);
+    ctx.lineTo(punt2.x, punt2.y);
+    ctx.closePath();
+    ctx.stroke();
+    reset();
+}
+
+function copiaFinestra()
+{
+    copia = ctx.getImageData(punt1.x,punt1.y,punt2.x-punt1.x,punt2.y-punt1.y);
+}
+
+function enganxaCopia()
+{
+   ctx.putImageData(copia,punt3.x,punt3.y);
+}
+
+function escalaFinestra()
+{
+    let canvasocult = document.createElement('canvas');
+    canvasocult.style.display = 'none';
+    document.body.appendChild(canvasocult);
+    canvasocult.width = (punt2.x-punt1.x)*2;
+    canvasocult.height = (punt2.y-punt1.y)*2;
+    let ctxocult = canvasocult.getContext('2d');
+    ctxocult.drawImage(canvas,punt1.x,punt1.y,punt2.x-punt1.x,punt2.y-punt1.y,0,0,canvasocult.width,canvasocult.height);
+    let fitxer = canvasocult.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    let imag = new Image;
+    ctx.drawImage(imag,0,0);
+    imag.src = fitxer;
+    ctxocult.drawImage(imag,punt1.x,punt1.y);
+    ctx.clearRect(punt1.x,punt1.y,canvasocult.width,canvasocult.height);
+    ctx.drawImage(canvasocult,punt1.x,punt1.y);
 }

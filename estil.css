@@ -7,13 +7,13 @@
     height:max-content;
     display:grid;
     grid-template-rows: 170px 170px 170px 170px 170px;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 0.3fr 0.7fr 1fr 1fr;
     grid-template-areas:
     "f g g g g g"
     "s g g g g g"
     "i g g g g g"
     "t g g g g g"
-    "gl cl p p p p"
+    "gl cl tx tp p p"
 }
 
 .Formes{
@@ -42,7 +42,7 @@
     grid-area:trian;
 }
 
-.imagecir,.imagerect,.imagepol,.imagetri{
+.imagecir,.imagerect,.imagepol,.imagetri,.imagecopiar,.imageEscala,.imageRotar{
     border:2px solid;
     width:100%;
     height:100%;
@@ -50,8 +50,27 @@
 }
 
 .Transformacions{
-grid-area: s;
-background-color: blue;
+    grid-area: s;
+    background-color: blue;
+    display:grid;
+    width:100%;
+    height: 100%;
+    object-fit: cover;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+    "copia escala"
+    "gir negatiu"
+}
+
+.imagecopiar{
+    grid-area:copia;
+}
+.imageEscala{
+    grid-area:escala;
+}
+.imageRotar{
+    grid-area:gir;
 }
 
 .Imatges{
@@ -90,9 +109,19 @@ background-color: blue;
     background-color:chartreuse;
     }
 
+.Text{
+        grid-area:tx;
+        background-color: plum;
+    }
+.TextParams{
+    grid-area:tp;
+    background-color: plum;
+    z-index: 0;
+}
+
+
 .AreaGrafica{
     grid-area: g;
-    /*background-color:crimson;*/
     }
 
 #tbCostats{
@@ -100,4 +129,70 @@ background-color: blue;
     width:30px;
     height:auto;
     background-color:lightgreen;
+}
+
+#btmes,#btmesf,#btmnysf
+{
+    display: inline;
+    width:50px;
+    height: 35px;
+    text-align: center;
+    font-size:23px;
+    background-color:lightsteelblue;
+}
+.retol
+{
+    display:block;
+    padding-top: 20px;
+    font-size:23px;
+    font-weight: bold;
+    padding-left: 30px;
+    margin-bottom: 30px;
+}
+#lbGruix{
+    padding-left: 100px;
+    margin-right: 20px;
+    font-size:29px;
+    display: inline;
+}
+#tipolin,#tipotxt{
+    display:block;
+    width:200px;
+    text-align: center;
+    font-size:19px;
+    height: 30px;
+    margin-left: 30px;
+    background-color:orangered;
+}
+
+#imgtext{
+    display:inline;
+    width:130px;
+    height:150px;
+    margin-top: 10px;
+}
+
+#tipotxt{
+    display: block;
+    background-color:thistle;
+    z-index: 1;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.retol2
+{
+    display:inline;
+    margin-bottom: 10px;
+    padding-top: 20px;
+    font-size:23px;
+    font-weight: bold;
+    padding-left: 30px;
+}
+#midatxt{
+    font-size:29px;
+    font-weight: bold;
+}
+#tbText{
+    width:700px;
 }

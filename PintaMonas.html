@@ -14,27 +14,59 @@
                 <img class="imagerect" src="images/rectangle.jpeg">
                 <img class="imagecir" src="images/elipse.jpeg">
                 <img class="imagepol" src="images/poligono.jpg">
-                <img class="imagetri" src="images/triangulo.jpg">
+                <img class="imagetri" src="images/linia.jpg">
         </div>
-        <div class="Transformacions"></div>
+        <div class="Transformacions">
+            <img class="imagecopiar" src='images/copiar.jpg'>
+            <img class="imageEscala" src='images/escala.jpg'>
+            <img class="imageRotar" src='images/rotar.jpg'>
+        </div>
         <div class="Imatges"></div>
-        <div class="TipusLinia"></div>
-        <div class="GruixLinia"></div>
+        <div class="TipusLinia">
+            <label class='retol'>Tipus linia: </label>
+            <select id="tipolin" onchange="tipolinChanged();">
+                <option>Continua</option>
+                <option>Discontinua</option>
+                <option>Linia punt</option>
+            </select>
+        </div>
+        <div class="GruixLinia">
+            <label class='retol'>Gruix linia: </label>
+            <label id="lbGruix" class="retol"></label>
+            <button id="btmes" onclick="incrementGl();">+</button>
+            <button id="btmes" onclick="decrementGl();">-</button>
+        </div>
         <div class="ColorLinia"> 
            <input class="ColorPicker" type="color" id="clin" value="#000000" onchange="asigColorLin(event);">
            <label id="lbColorLinia">Color linia</label>
            <input class="ColorPicker" type="color" id="cfarcit" value="#FFFFFF" onchange="asigColorFarcit(event);">
            <label id="lbColorLinia">Color farcit</label>
         </div>
+        <div class="Text">            
+            <img id="imgtext" src="images/text.png">
+            
+        </div>
+        <div class="TextParams">
+            <label class='retol2'>Estil:</label><br>
+            <select id="tipotxt">
+                <option>Normal</option>
+                <option>Italic</option>
+                <option>Bold</option>
+            </select>
+            <label class="retol2">Mida:</label>
+            <label  id="midatxt">13</label>
+            <button id="btmesf" onclick="incrementFs();">+</button>
+            <button id="btmnysf" onclick="decrementFs();">-</button>
+        </div>
         <div class="Paterns"></div>
         <div id="areagrafica" class="AreaGrafica">
-            <canvas id="lienzo" width="2000" height="1000"> </canvas>    
+            <canvas id="lienzo" width="1500" height="880"> </canvas>    
         </div>
-        
     </div>
     <div>
         <label id="lbInfo"></label>
         <input type="text" id="tbCostats" hidden="true">
+        <input type="text" id="tbText" hidden="true">
     </div>
 </body>
 </html>
