@@ -42,7 +42,7 @@
     grid-area:trian;
 }
 
-.imagecir,.imagerect,.imagepol,.imagetri,.imagecopiar,.imageEscala,.imageRotar{
+.imagecir,.imagerect,.imagepol,.imagetri,.imagecopiar,.imageEscala,.imageRotar,.imageSim{
     border:2px solid;
     width:100%;
     height:100%;
@@ -60,7 +60,7 @@
     grid-template-columns: 1fr 1fr;
     grid-template-areas: 
     "copia escala"
-    "gir negatiu"
+    "gir simetria"
 }
 
 .imagecopiar{
@@ -71,6 +71,9 @@
 }
 .imageRotar{
     grid-area:gir;
+}
+.imageSim{
+    grid-area:simetria;
 }
 
 .Imatges{
@@ -124,7 +127,7 @@
     grid-area: g;
     }
 
-#tbCostats,#tbGraus{
+#tbCostats,#tbGraus,#tbSimetria{
     font-size:23px;
     width:30px;
     height:auto;

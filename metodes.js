@@ -9,6 +9,8 @@ var ctx = undefined;// Context de canvas
 var info = undefined;// Etiqueta pels missatges al usuari
 var costats = 0; // Per dibuixar poligons
 var graus = 0; // Per a els girs
+var sim = ''; // Per a la simetria
+var direcciosimetria ='';
 var gruixlin = 1; // Gruix de linia
 var fontsize = 13; //Mida de font
 var copia = undefined; // Contingut de la copia d'una finestra ( array de pixels)
@@ -27,6 +29,7 @@ function iniciar() {
     document.getElementById('tbCostats').value = '';
     document.getElementById('tbCostats').addEventListener('keyup', checkEnter);
     document.getElementById('tbGraus').addEventListener('keyup', checkGraus);
+    document.getElementById('tbSimetria').addEventListener('keyup', checkSimetria);
     document.getElementById('lbGruix').innerText = gruixlin;
     document.getElementById('tipotxt').value = "Normal";
 }
@@ -52,6 +55,12 @@ function asigColorFarcit(event) {
 function reset() {
     queDibuixem = 0;
     punt1.x = punt2.x = punt1.y = punt2.y = undefined;
+    document.getElementById('tbCostats').value = '';
+    document.getElementById('tbGraus').value = '';
+    document.getElementById('tbSimetria').value = '';
+    document.getElementById('tbGraus').hidden = true;
+    document.getElementById('tbSimetria').hidden = true;
+    document.getElementById('tbCostats').hidden = true;
 }
 
 /* Augmenta el gruix de linia quan es prem el botó + */
@@ -113,6 +122,7 @@ function mouseClick(event) {
 
 /* Assigna el nombre de opcio a dibuixar en funcio de la posicio on s'hagi fet click a l'area de seleccio */
 function seleccionarOpcio() {
+    reset();
     document.getElementById("tbCostats").hidden = true;
     if (posx < -188 && posy < 85) {
         info.innerHTML = "Seleccionat Rectangle. Clickeu el punt inicial.";
@@ -154,6 +164,12 @@ function seleccionarOpcio() {
         info.innerHTML = "Seleccionat gir. Introduiu la quantitat de graus i clickeu el punt superior esquerre de la finestra a girar."
         queDibuixem = 8; // Gir d'una finestra.
     }
+    else if (posx > -188 && posy > 258 && posy < 339) {
+        document.getElementById("tbSimetria").hidden = false;
+        document.getElementById("tbSimetria").focus();
+        info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o: v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la finestra."
+        queDibuixem = 9; // Gir d'una finestra.
+    }
     else
         queDibuixem = 0;
 }
@@ -191,10 +207,7 @@ function aplicaOpcio() {
             {
                 if (costats == 0) {
                     alert("Quantitat de costats no introduida.Introduïu-la primer.")
-                    queDibuixem = 0;
-                    punt1.x = punt2.x = punt1.y = punt2.y = undefined;
-                    info.innerHTML = "";
-                    document.getElementById('tbCostats').hidden = true;
+                    document.getElementById('tbCostats').focus();
                     return;
                 }
                 asigPunt1();
@@ -257,7 +270,6 @@ function aplicaOpcio() {
             }
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
-                //copiaFinestra();
                 escalaFinestra();
                 info.innerHTML = "Finestra escalada al doble.";
                 reset();
@@ -268,8 +280,7 @@ function aplicaOpcio() {
             {
                 if (graus == 0) {
                     alert("Quantitat de graus no introduida o zero.Introduïu-la primer.")
-                    reset();
-                    document.getElementById('tbGraus').hidden = true;
+                    document.getElementById('tbGraus').focus();
                     return;
                 }
                 asigPunt1();
@@ -280,6 +291,24 @@ function aplicaOpcio() {
                 copiaFinestra();
                 giraFinestra();
                 info.innerHTML = "Finestra girada.";
+                reset();
+            }
+            break
+        case 9: //Simetria d'una finestra
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                if (sim == '') {
+                    alert("Direcció de simetria no introduida. Si us plau introduïu-la primer.")
+                    document.getElementById('tbSimetria').focus();
+                    return;
+                }
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a fer simetria.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                simetriaFinestra();
+                info.innerHTML = "Simetria feta.";
                 reset();
             }
             break
@@ -421,6 +450,19 @@ function checkGraus(e) {
     }
 }
 
+function checkSimetria(e) {
+
+    if (e.key === 'Enter' || e.keyCode === 13) {
+        sim = document.getElementById('tbSimetria').value;
+        if (sim != 'h' && sim != 'H' && sim != 'v' && sim != 'V')
+            alert("Valor invalid. Si us plau introduïu: h o H per a simetria horitzontal, y v o V per simetria vertical.");
+        else {
+            direcciosimetria = sim;
+            document.getElementById('tbSimetria').hidden = true;
+        }
+    }
+}
+
 /* Dibuixa una linia */
 function drawLinia() {
     ctx.beginPath();
@@ -432,7 +474,11 @@ function drawLinia() {
 }
 
 function copiaFinestra() {
-    copia = ctx.getImageData(punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y);
+    let distx = punt2.x - punt1.x;
+    let disty = punt2.y - punt1.y;
+    distx = (distx < 0)?distx * -1:distx;
+    disty = (disty < 0)?disty * -1:disty;
+    copia = ctx.getImageData(punt1.x, punt1.y, distx,disty );
 }
 
 function enganxaCopia() {
@@ -458,23 +504,50 @@ function escalaFinestra() {
 
 function giraFinestra()
 {
-    //ctx.save();
+    // Establir un nou canvas invisible el doble de gran que la finestra seleccionada
     let canvasocult = document.createElement('canvas');
     canvasocult.style.display = 'none';
     document.body.appendChild(canvasocult);
     canvasocult.width = (punt2.x - punt1.x)*2;
     canvasocult.height = (punt2.y - punt1.y)*2;
     let ctxocult = canvasocult.getContext('2d');
+    // Establir el context del canvas ocult amb escala la meitat i traslladar el punt origen
     ctxocult.scale(0.5,0.5);
-    ctxocult.translate(canvasocult.width,0);
+    ctxocult.translate(canvasocult.width*Math.sin(graus),0);
+    // Rotar el context del canvas ocult la quantitat de graus desitjada i dibuixar una imatge
+    // extreta del canvas original del tamany de la finestra de selecció
     ctxocult.rotate(graus);
     ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
-    let fitxer = canvasocult.toDataURL("image/png").replace("image/png", "image/octet-stream");
-    let imag = new Image;
-    ctx.drawImage(imag, 0, 0);
-    imag.src = fitxer;
-    ctxocult.drawImage(imag, punt1.x, punt1.y);
+    // Esborrar el dibuix contingut a la finestra de seleccio i afegir el dibuix en el canvas ocult
     ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
     graus = 0;
+}
+
+function simetriaFinestra()
+{
+  // Establir un nou canvas invisible el doble de gran que la finestra seleccionada
+  let canvasocult = document.createElement('canvas');
+  canvasocult.style.display = 'none';
+  document.body.appendChild(canvasocult);
+  canvasocult.width = (punt2.x - punt1.x);
+  canvasocult.height = (punt2.y - punt1.y);
+  let ctxocult = canvasocult.getContext('2d');
+  // Extreure una imatge de la finestra de seleccio al canvas original
+  ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+  // Voltejar el canvas horitzontal o verticalment, esborrar el dibuix contingut a la finestra
+  // de seleccio i afegir el dibuix en el canvas ocult voltejat.
+  ctx.save();
+  ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
+  if(sim == 'h' || sim == 'H'){
+    ctx.scale(1,-1);
+    ctx.translate(0,-440);
+  }
+  else if(sim == 'v' || sim == 'V'){
+    ctx.scale(-1,1);
+    ctx.translate((-punt1.x*2)-180,0);
+  }
+  ctx.drawImage(canvasocult, punt1.x, punt1.y);
+  ctx.restore();
+  sim = '';
 }
