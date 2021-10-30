@@ -1,5 +1,5 @@
 #lbInfo{
-    font-size:29px;
+    font-size:2em;
     font-weight: bold;
 }
 
@@ -98,18 +98,19 @@
     }
 .ColorPicker{
     z-index: 1;
-    width:150px;
-    height:75px;
-    margin-top:5px;
+    width:35%;
+    height:40%;
+    margin-top:2.25%;
 }
 #lbColorLinia{
-    font-size:23px;
-    margin-bottom: 50px;
+    font-size:1.5em;
+    margin-bottom: 2em;
 }
 
 .Paterns{
     grid-area: p;
     background-color:chartreuse;
+    width:100%;
     }
 
 .Text{
@@ -128,8 +129,8 @@
     }
 
 #tbCostats,#tbGraus,#tbSimetria{
-    font-size:23px;
-    width:30px;
+    font-size:1.5em;
+    width:1.5em;
     height:auto;
     background-color:lightgreen;
 }
@@ -137,65 +138,92 @@
 #btmes,#btmesf,#btmnysf
 {
     display: inline;
-    width:50px;
-    height: 35px;
+    width:13%;
+    height: 20%;
     text-align: center;
-    font-size:23px;
+    font-size:1.5em;
     background-color:lightsteelblue;
+}
+
+label{
+    font-size:1.5em;
+    font-weight: bold;
 }
 .retol
 {
     display:block;
-    padding-top: 20px;
-    font-size:23px;
-    font-weight: bold;
+    padding-top: 5%;
     padding-left: 30px;
     margin-bottom: 30px;
 }
+
 #lbGruix{
     padding-left: 100px;
     margin-right: 20px;
-    font-size:29px;
     display: inline;
 }
+
 #tipolin,#tipotxt{
     display:block;
-    width:200px;
+    width:60%;
     text-align: center;
-    font-size:19px;
-    height: 30px;
-    margin-left: 30px;
+    font-size:1.2em;
+    height: 20%;
+    margin-left: 20%;
     background-color:orangered;
 }
 
 #imgtext{
     display:inline;
-    width:130px;
-    height:150px;
-    margin-top: 10px;
+    width:100%;
+    height:90%;
+    margin-top: 8%;
 }
 
 #tipotxt{
-    display: block;
     background-color:thistle;
     z-index: 1;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 10%;
+    margin-bottom: 10%;
 }
 
 .retol2
 {
-    display:inline;
-    margin-bottom: 10px;
-    padding-top: 20px;
-    font-size:23px;
-    font-weight: bold;
-    padding-left: 30px;
+    padding-left: 10%;
 }
-#midatxt{
-    font-size:29px;
-    font-weight: bold;
-}
+
 #tbText{
-    width:700px;
+    width:40%;
+}
+#lbTextures{
+    display:block;
+    width:100%;
+    text-align: center;
+}
+
+.imatgesTextures{
+    display:grid;
+    width:100%;
+    height: 100%;
+    object-fit: cover;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: 
+    "maons pedres tres cuatro cinco seis"
+    "siete ocho nueve diez once doce"
+}
+
+.imgmao{
+    grid-area:maons;
+}
+.imgpedres{
+    grid-area:pedres;
+}
+
+.imatgesTextures > *
+{
+    border:2px solid;
+    width:100%;
+    height:100;
+    object-fit: cover;
 }

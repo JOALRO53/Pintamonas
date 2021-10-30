@@ -48,6 +48,7 @@ function asigColorLin(event) {
 
 /* Assigna al context del canvas el color de farcit quan es canvia la seleccio al color picker cfarcit */
 function asigColorFarcit(event) {
+    resetTextura();
     ctx.fillStyle = document.getElementById('cfarcit').value;
 }
 
@@ -61,6 +62,7 @@ function reset() {
     document.getElementById('tbGraus').hidden = true;
     document.getElementById('tbSimetria').hidden = true;
     document.getElementById('tbCostats').hidden = true;
+    document.getElementById('tbText').hidden = true;
 }
 
 /* Augmenta el gruix de linia quan es prem el botó + */
@@ -169,6 +171,19 @@ function seleccionarOpcio() {
         document.getElementById("tbSimetria").focus();
         info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o: v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la finestra."
         queDibuixem = 9; // Gir d'una finestra.
+    }
+    else if(posx > 759 && posy > 710) // Textura
+    {
+        resetTextura();
+        info.innerHTML = "Seleccionada textura";
+        if (posx > 759 && posx < 888 && posy > 710 && posy < 760) {
+            document.getElementById("maons").style.border = 'thick solid red';
+            setTextura('Textures/maons.jpg');
+        }
+        if (posx > 888 && posx < 1014 && posy > 710 && posy < 760) {
+            document.getElementById("pedres").style.border = 'thick solid red';
+            setTextura('Textures/pedres.jpg');
+        }
     }
     else
         queDibuixem = 0;
@@ -541,7 +556,7 @@ function simetriaFinestra()
   ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
   if(sim == 'h' || sim == 'H'){
     ctx.scale(1,-1);
-    ctx.translate(0,-440);
+    ctx.translate(0,-punt2.y*2+(punt2.y-punt1.y));
   }
   else if(sim == 'v' || sim == 'V'){
     ctx.scale(-1,1);
@@ -550,4 +565,19 @@ function simetriaFinestra()
   ctx.drawImage(canvasocult, punt1.x, punt1.y);
   ctx.restore();
   sim = '';
+}
+
+function setTextura(rutaimage)
+{
+    let img = new Image();
+    img.src = rutaimage;
+    let pattern = ctx.createPattern(img,'repeat');
+    ctx.fillStyle = pattern;
+}
+
+function resetTextura()
+{
+    Array.from(document.getElementsByTagName('img')).forEach(element => {
+        element.style.border = 'thin solid black';
+    });
 }
