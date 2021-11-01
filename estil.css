@@ -1,5 +1,5 @@
 #lbInfo{
-    font-size:2em;
+    font-size:1.8em;
     font-weight: bold;
 }
 
@@ -79,7 +79,24 @@
 .Imatges{
     grid-area: i;
     background-color:blueviolet;
+    display:grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-areas: 
+    "carregar negatiu tres cuatre"
     }
+
+.Imatges > *
+{
+    border:2px solid;
+    width:100%;
+    object-fit: cover; 
+}
+.carregaimg{
+    grid-area:carregar;
+}
+.imgnegatiu{
+    grid-area:negatiu;
+}
 
 .TipusLinia{
     grid-area: t;
@@ -203,14 +220,14 @@ label{
 
 .imatgesTextures{
     display:grid;
+    align-items: center;
     width:100%;
-    height: 100%;
+    height: 80%;
     object-fit: cover;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 16.5% 16.6% 16.6% 16.6% 16.6% 16.6%;
+    grid-template-rows: 1fr;
     grid-template-areas: 
-    "maons pedres tres cuatro cinco seis"
-    "siete ocho nueve diez once doce"
+    "maons pedres terra titani fulla petra"
 }
 
 .imgmao{
@@ -218,6 +235,18 @@ label{
 }
 .imgpedres{
     grid-area:pedres;
+}
+.imgterra{
+    grid-area:terra;
+}
+.imgtitani{
+    grid-area:titani;
+}
+.imgfulla{
+    grid-area:fulla;
+}
+.imgpetra{
+    grid-area:petra;
 }
 
 .imatgesTextures > *

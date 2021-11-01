@@ -13,8 +13,9 @@ var sim = ''; // Per a la simetria
 var direcciosimetria ='';
 var gruixlin = 1; // Gruix de linia
 var fontsize = 13; //Mida de font
-var copia = undefined; // Contingut de la copia d'una finestra ( array de pixels)
-
+//var copia = undefined; // Contingut de la copia d'una finestra ( array de pixels)
+var canvasocult;
+var ctxocult;
 
 /* Assigna valors inicials */
 function iniciar() {
@@ -170,19 +171,54 @@ function seleccionarOpcio() {
         document.getElementById("tbSimetria").hidden = false;
         document.getElementById("tbSimetria").focus();
         info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o: v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la finestra."
-        queDibuixem = 9; // Gir d'una finestra.
+        queDibuixem = 9; // Simetria d'una finestra.
+    }
+    else if(posx < -280 && posy > 340 && posy < 510)// Carregar imatge
+    {
+        info.innerHTML = 'Seleccionat carregar imatge';
+        let ocult = document.getElementById('fileElem');
+        ocult.value = null;
+        ocult.click();
+    }
+    else if(posx > -280 && posx < -185 && posy > 340 && posy < 510)//Negatiu
+    {
+        info.innerHTML = "Seleccionat imatge a negatiu. Premeu el punt superior esquerre de la finestra a negativitzar.";
+        queDibuixem = 10; //Negatiu d'una finestra.
+
     }
     else if(posx > 759 && posy > 710) // Textura
     {
         resetTextura();
         info.innerHTML = "Seleccionada textura";
-        if (posx > 759 && posx < 888 && posy > 710 && posy < 760) {
+        if (posx > 760 && posx < 885 && posy > 710 && posy < 795) {
             document.getElementById("maons").style.border = 'thick solid red';
+            document.getElementById("maons").style.zIndex = 1;
             setTextura('Textures/maons.jpg');
         }
-        if (posx > 888 && posx < 1014 && posy > 710 && posy < 760) {
+        else if (posx > 885 && posx < 1010 && posy > 710 && posy < 795) {
             document.getElementById("pedres").style.border = 'thick solid red';
+            document.getElementById("pedres").style.zIndex = 1;
             setTextura('Textures/pedres.jpg');
+        }
+        else if (posx > 1010 && posx < 1140 && posy > 710 && posy < 795) {
+            document.getElementById("terra").style.border = 'thick solid red';
+            document.getElementById("terra").style.zIndex = 1;
+            setTextura('Textures/terra.jpg');
+        }
+        else if (posx > 1140 && posx < 1265 && posy > 710 && posy < 795) {
+            document.getElementById("titani").style.border = 'thick solid red';
+            document.getElementById("titani").style.zIndex = 1;
+            setTextura('Textures/titani.jpg');
+        }
+        else if (posx > 1265 && posx < 1390 && posy > 710 && posy < 795) {
+            document.getElementById("fulla").style.border = 'thick solid red';
+            document.getElementById("fulla").style.zIndex = 1;
+            setTextura('Textures/fulla.jpg');
+        }
+        else if (posx > 1390 && posy > 710 && posy < 795) {
+            document.getElementById("petra").style.border = 'thick solid red';
+            document.getElementById("petra").style.zIndex = 1;
+            setTextura('Textures/petra.jpg');
         }
     }
     else
@@ -263,16 +299,15 @@ function aplicaOpcio() {
             if (posx > 0 && punt1.x == undefined)// Click en area grafica
             {
                 asigPunt1();
-                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a copiar.";
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a copiar.";
             }
             else if (punt1.x && !punt2.x) {
-                asigPunt2();
-                copiaFinestra();
+                asigPunt2();                
                 info.innerHTML = "Clikeu el punt de inserció de la copia.";
             }
             else if (punt1.x && punt2.x && !punt3.x) {
                 asigPunt3();
-                enganxaCopia();
+                copiaFinestra();                
                 info.innerHTML = "Finestra copiada.";
                 reset();
             }
@@ -281,7 +316,7 @@ function aplicaOpcio() {
             if (posx > 0 && punt1.x == undefined)// Click en area grafica
             {
                 asigPunt1();
-                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a escalar.";
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a escalar.";
             }
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
@@ -299,7 +334,7 @@ function aplicaOpcio() {
                     return;
                 }
                 asigPunt1();
-                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a girar.";
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a girar.";
             }
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
@@ -318,12 +353,25 @@ function aplicaOpcio() {
                     return;
                 }
                 asigPunt1();
-                info.innerHTML = "Clickeu el punt inferior esquerre de la finestra a fer simetria.";
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a fer simetria.";
             }
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
                 simetriaFinestra();
                 info.innerHTML = "Simetria feta.";
+                reset();
+            }
+            break
+        case 10: //Negatiu d'una finestra
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a negativitzar.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                negatiuFinestra();
+                info.innerHTML = "Negatiu fet.";
                 reset();
             }
             break
@@ -488,31 +536,29 @@ function drawLinia() {
     reset();
 }
 
-function copiaFinestra() {
-    let distx = punt2.x - punt1.x;
-    let disty = punt2.y - punt1.y;
-    distx = (distx < 0)?distx * -1:distx;
-    disty = (disty < 0)?disty * -1:disty;
-    copia = ctx.getImageData(punt1.x, punt1.y, distx,disty );
-}
-
-function enganxaCopia() {
-    ctx.putImageData(copia, punt3.x, punt3.y);
-}
-
-function escalaFinestra() {
-    let canvasocult = document.createElement('canvas');
+function setCanvasOcult()
+{
+    canvasocult = document.createElement('canvas');
     canvasocult.style.display = 'none';
     document.body.appendChild(canvasocult);
+    canvasocult.width = (punt2.x - punt1.x);
+    canvasocult.height = (punt2.y - punt1.y);
+    ctxocult = canvasocult.getContext('2d');
+}
+
+function copiaFinestra() {
+    setCanvasOcult();
+    // Extreure una imatge de la finestra de seleccio al canvas original
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    ctx.drawImage(canvasocult,punt3.x,punt3.y);
+}
+
+
+function escalaFinestra() {
+    setCanvasOcult();
     canvasocult.width = (punt2.x - punt1.x) * 2;
     canvasocult.height = (punt2.y - punt1.y) * 2;
-    let ctxocult = canvasocult.getContext('2d');
     ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
-    let fitxer = canvasocult.toDataURL("image/png").replace("image/png", "image/octet-stream");
-    let imag = new Image;
-    ctx.drawImage(imag, 0, 0);
-    imag.src = fitxer;
-    ctxocult.drawImage(imag, punt1.x, punt1.y);
     ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
 }
@@ -520,12 +566,10 @@ function escalaFinestra() {
 function giraFinestra()
 {
     // Establir un nou canvas invisible el doble de gran que la finestra seleccionada
-    let canvasocult = document.createElement('canvas');
-    canvasocult.style.display = 'none';
-    document.body.appendChild(canvasocult);
+    setCanvasOcult();
     canvasocult.width = (punt2.x - punt1.x)*2;
     canvasocult.height = (punt2.y - punt1.y)*2;
-    let ctxocult = canvasocult.getContext('2d');
+    //let ctxocult = canvasocult.getContext('2d');
     // Establir el context del canvas ocult amb escala la meitat i traslladar el punt origen
     ctxocult.scale(0.5,0.5);
     ctxocult.translate(canvasocult.width*Math.sin(graus),0);
@@ -534,7 +578,7 @@ function giraFinestra()
     ctxocult.rotate(graus);
     ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
     // Esborrar el dibuix contingut a la finestra de seleccio i afegir el dibuix en el canvas ocult
-    ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
+    ctx.clearRect(punt1.x, punt1.y, (punt2.x - punt1.x), (punt2.y - punt1.y));
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
     graus = 0;
 }
@@ -542,12 +586,7 @@ function giraFinestra()
 function simetriaFinestra()
 {
   // Establir un nou canvas invisible el doble de gran que la finestra seleccionada
-  let canvasocult = document.createElement('canvas');
-  canvasocult.style.display = 'none';
-  document.body.appendChild(canvasocult);
-  canvasocult.width = (punt2.x - punt1.x);
-  canvasocult.height = (punt2.y - punt1.y);
-  let ctxocult = canvasocult.getContext('2d');
+  setCanvasOcult();
   // Extreure una imatge de la finestra de seleccio al canvas original
   ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
   // Voltejar el canvas horitzontal o verticalment, esborrar el dibuix contingut a la finestra
@@ -579,5 +618,41 @@ function resetTextura()
 {
     Array.from(document.getElementsByTagName('img')).forEach(element => {
         element.style.border = 'thin solid black';
+        element.style.zIndex = 0;
     });
+}
+
+function insertarImatge(event)
+{
+    var input = event.target;
+    var reader = new FileReader();
+    reader.onload = ()=>{
+        var dataURL = reader.result;
+        let imag = new Image();
+        imag.src = dataURL;
+        imag.width = 500;
+        imag.height = 400;
+        imag.onload = ()=>{
+        ctx.drawImage(imag,0,0,500,400,10,5,500,400);
+        }
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function negatiuFinestra()
+{
+    setCanvasOcult();
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    let imageData = ctxocult.getImageData(0, 0, canvasocult.width,canvasocult.height);
+    let pixels = imageData.data;
+    for (var i = 0; i < pixels.length; i += 4) 
+    {
+    pixels[i]= 255 - pixels[i];// red
+    pixels[i+1] = 255 - pixels[i+1]; // green
+    pixels[i+2] = 255 - pixels[i+2]; // blue
+    }
+    ctxocult.putImageData(imageData,0,0);
+    // modifiquem original
+    ctx.clearRect(punt1.x,punt1.y,punt2.x - punt1.x, punt2.y - punt1.y);
+    ctx.drawImage(canvasocult, punt1.x, punt1.y);
 }

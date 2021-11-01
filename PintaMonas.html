@@ -22,7 +22,10 @@
             <img class="imageRotar" src='images/rotar.jpg'>
             <img class="imageSim" src="images/simetria.png">
         </div>
-        <div class="Imatges"></div>
+        <div class="Imatges">
+            <img class="carregaimg" src='images/carregaimg.png'>
+            <img class="imgnegatiu" src='images/imgnegatiu.jpg'>
+        </div>
         <div class="TipusLinia">
             <label class='retol'>Tipus linia: </label>
             <select id="tipolin" onchange="tipolinChanged();">
@@ -45,7 +48,6 @@
         </div>
         <div class="Text">            
             <img id="imgtext" src="images/text.png">
-            
         </div>
         <div class="TextParams">
             <label class='retol2'>Estil:</label><br>
@@ -64,10 +66,14 @@
             <div class="imatgesTextures">
                 <img id = "maons"src="Textures/maons.jpg" class="imgmao">
                 <img id = "pedres"src="Textures/pedres.jpg" class="imgpedres">
+                <img id = "terra"src="Textures/terra.jpg" class="imgterra">
+                <img id = "titani"src="Textures/titani.jpg" class="imgtitani">
+                <img id = "fulla"src="Textures/fulla.jpg" class="imgfulla">
+                <img id = "petra"src="Textures/petra.jpg" class="imgpetra">
             </div>
         </div>
         <div id="areagrafica" class="AreaGrafica">
-            <canvas id="lienzo" width="1526" height="880"> </canvas>    
+            <canvas id="lienzo" width="1526" height="880"></canvas>    
         </div>
     </div>
     <div>
@@ -76,6 +82,7 @@
         <input type="text" id="tbText" hidden="true">
         <input type="text" id="tbGraus" hidden="true">
         <input type="text" id="tbSimetria" hidden="true">
+        <input type="file" id="fileElem" multiple accept="image/*" hidden="true" onchange="insertarImatge(event)">
     </div>
 </body>
 </html>
