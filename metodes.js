@@ -39,7 +39,7 @@ function iniciar() {
 function position(event) {
     posx = event.clientX - 385;
     posy = event.clientY - 8;
-    //info.innerHTML = "X: " + posx + " Y: " + posy;
+    info.innerHTML = "X: " + posx + " Y: " + posy;
 }
 
 /* Assigna al context del canvas el color de linia quan es canvia la seleccio al color picker clin */
@@ -184,6 +184,18 @@ function seleccionarOpcio() {
     {
         info.innerHTML = "Seleccionat imatge a negatiu. Premeu el punt superior esquerre de la finestra a negativitzar.";
         queDibuixem = 10; //Negatiu d'una finestra.
+
+    }
+    else if(posx > -185 && posx < -90 && posy > 340 && posy < 510)//Escala de grisos
+    {
+        info.innerHTML = "Seleccionat imatge a escala de grisos. Premeu el punt superior esquerre de la finestra a transformar.";
+        queDibuixem = 11; //Escala de grisos d'una finestra.
+
+    }
+    else if(posx > -90 && posx < 0 && posy > 340 && posy < 510)//Difuminat
+    {
+        info.innerHTML = "Seleccionat imatge a difuminar. Premeu el punt superior esquerre de la finestra a transformar.";
+        queDibuixem = 12; //Difuminat d'una finestra.
 
     }
     else if(posx > 759 && posy > 710) // Textura
@@ -372,6 +384,32 @@ function aplicaOpcio() {
                 asigPunt2();
                 negatiuFinestra();
                 info.innerHTML = "Negatiu fet.";
+                reset();
+            }
+            break
+        case 11: //Escala de grisos d'una finestra
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a transformar.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                grisosFinestra();
+                info.innerHTML = "Imatge transformada.";
+                reset();
+            }
+            break
+        case 12: //Difuminat d'una finestra
+            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            {
+                asigPunt1();
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a transformar.";
+            }
+            else if (punt1.x && !punt2.x) {
+                asigPunt2();
+                difuminatFinestra();
+                info.innerHTML = "Imatge transformada.";
                 reset();
             }
             break
@@ -656,3 +694,48 @@ function negatiuFinestra()
     ctx.clearRect(punt1.x,punt1.y,punt2.x - punt1.x, punt2.y - punt1.y);
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
 }
+
+function grisosFinestra()
+{
+    setCanvasOcult();
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    let imageData = ctxocult.getImageData(0, 0, canvasocult.width,canvasocult.height);
+    let pixels = imageData.data;
+    
+    for(var i = 0; i < pixels.length; i += 4) {
+        let grayscale= pixels[i]+pixels[i+1]+pixels[i+2]/3;
+        pixels[i]=grayscale;
+        pixels[i+1]=grayscale;
+        pixels[i+2]=grayscale;
+      }
+
+    let imgData2=ctxocult.getImageData(0,0,canvasocult.width,canvasocult.height);
+    let data2=imgData2.data;
+    
+    for(var i = 0; i < data2.length; i += 4) {
+        let grayscale= 0.33*data2[i]+0.5*data2[i+1]+0.15*data2[i+2];
+        data2[i]=grayscale;
+        data2[i+1]=grayscale;
+        data2[i+2]=grayscale;
+      }
+
+    ctxocult.putImageData(imgData2,0,0);
+    // modifiquem original
+    ctx.clearRect(punt1.x,punt1.y,punt2.x - punt1.x, punt2.y - punt1.y);
+    ctx.drawImage(canvasocult, punt1.x, punt1.y);
+}
+
+function difuminatFinestra() {
+    ctx.globalAlpha = 0.125;
+      for (y = -1; y < 2; y++) {
+        for (x = -1; x < 2; x++) {
+            ctx.drawImage(canvas, punt1.x, punt1.y);
+        }
+      }
+    ctx.globalAlpha = 1.0;
+  }
+  
+  //add the function call in the imageObj.onload
+  imageObj.onload = function(){
+    blur(imageObj, context);
+  };

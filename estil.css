@@ -42,7 +42,7 @@
     grid-area:trian;
 }
 
-.imagecir,.imagerect,.imagepol,.imagetri,.imagecopiar,.imageEscala,.imageRotar,.imageSim{
+.imagecir,.imagerect,.imagepol,.imagetri,.imagecopiar,.imageEscala,.imageRotar,.imageSim,.imggrisos,.difuminat{
     border:2px solid;
     width:100%;
     height:100%;
@@ -101,6 +101,7 @@
 .TipusLinia{
     grid-area: t;
     background-color:brown;
+    border:2px black solid;
 }
 
 .GruixLinia{
