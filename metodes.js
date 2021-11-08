@@ -39,7 +39,7 @@ function iniciar() {
 function position(event) {
     posx = event.clientX - 385;
     posy = event.clientY - 8;
-    info.innerHTML = "X: " + posx + " Y: " + posy;
+    //info.innerHTML = "X: " + posx + " Y: " + posy;
 }
 
 /* Assigna al context del canvas el color de linia quan es canvia la seleccio al color picker clin */
@@ -51,6 +51,8 @@ function asigColorLin(event) {
 function asigColorFarcit(event) {
     resetTextura();
     ctx.fillStyle = document.getElementById('cfarcit').value;
+    info.innerHTML = "";
+
 }
 
 /* Reseteja les seleccions actuals */
@@ -64,6 +66,7 @@ function reset() {
     document.getElementById('tbSimetria').hidden = true;
     document.getElementById('tbCostats').hidden = true;
     document.getElementById('tbText').hidden = true;
+    ctx.restore();
 }
 
 /* Augmenta el gruix de linia quan es prem el botó + */
@@ -110,6 +113,7 @@ function tipolinChanged() {
             ctx.setLineDash([5, 10, 2]);
             break;
     }
+    info.innerHTML = "";
 }
 
 /* Crida al metode adequat en funcio del estat de seleccio actual i la posicio on es fa click */
@@ -350,7 +354,7 @@ function aplicaOpcio() {
             }
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
-                copiaFinestra();
+                //copiaFinestra();
                 giraFinestra();
                 info.innerHTML = "Finestra girada.";
                 reset();
@@ -404,12 +408,12 @@ function aplicaOpcio() {
             if (posx > 0 && punt1.x == undefined)// Click en area grafica
             {
                 asigPunt1();
-                info.innerHTML = "Clickeu el punt inferior dret de la finestra a transformar.";
+                info.innerHTML = "Clickeu el punt inferior dret de la finestra a transformar.";                
             }
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
                 difuminatFinestra();
-                info.innerHTML = "Imatge transformada.";
+                info.innerHTML = "Imatge transformada.";                
                 reset();
             }
             break
@@ -726,16 +730,14 @@ function grisosFinestra()
 }
 
 function difuminatFinestra() {
-    ctx.globalAlpha = 0.125;
-      for (y = -1; y < 2; y++) {
-        for (x = -1; x < 2; x++) {
-            ctx.drawImage(canvas, punt1.x, punt1.y);
+    setCanvasOcult();
+    ctxocult.globalAlpha = 0.125;
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    for (y = -1; y < 3; y++) {
+        for (x = -1; x < 3; x++) {
+            ctxocult.drawImage(canvasocult, x, y);
         }
       }
-    ctx.globalAlpha = 1.0;
+    ctx.clearRect(punt1.x,punt1.y,punt2.x-punt1.x,punt2.y-punt2.y);
+    ctx.drawImage(canvasocult,punt1.x,punt1.y);
   }
-  
-  //add the function call in the imageObj.onload
-  imageObj.onload = function(){
-    blur(imageObj, context);
-  };

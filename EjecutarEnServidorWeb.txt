@@ -1,0 +1,7 @@
+Para ejecutar PintaMones.html en un servidor web, escribir en la misma carpeta donde está el html:
+
+python3 -m http.server
+
+Luego en el navegador, escribir:
+
+localhost:8000/PintaMonas.html
