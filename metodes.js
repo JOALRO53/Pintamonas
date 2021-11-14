@@ -1,8 +1,8 @@
 /* Variables globals */
 var posx, posy; //Recullen posicio del ratoli quan es fa click
 var queDibuixem = 0; // 0 sense seleccio, 1 Rectangle, 2 El-lipse, 3 Poligon, 4 Linia
-var punt1 = { x: undefined, y: undefined };//Recullen punt inicial i final de element a dibuixar
-var punt2 = { x: undefined, y: undefined };
+var punt1 = { x: undefined, y: undefined };//Recullen punt inicial,final i d'inserció de 
+var punt2 = { x: undefined, y: undefined };//  l'element a dibuixar 
 var punt3 = { x: undefined, y: undefined };
 var canvas = undefined;// Canvas
 var ctx = undefined;// Context de canvas 
@@ -10,15 +10,16 @@ var info = undefined;// Etiqueta pels missatges al usuari
 var costats = 0; // Per dibuixar poligons
 var graus = 0; // Per a els girs
 var sim = ''; // Per a la simetria
-var direcciosimetria ='';
 var gruixlin = 1; // Gruix de linia
 var fontsize = 13; //Mida de font
-//var copia = undefined; // Contingut de la copia d'una finestra ( array de pixels)
-var canvasocult;
+var canvasocult; // Canvas auxiliar per fer copies i transformacions
 var ctxocult;
+var ample, alt;// Amplada i alçada de la finestra descontant les barres de menu
 
 /* Assigna valors inicials */
 function iniciar() {
+    ample = window.screen.availWidth; // 1920
+    alt = window.screen.availHeight; // 1040
     canvas = document.getElementById('lienzo');
     ctx = canvas.getContext('2d');
     ctx.strokeStyle = "black";
@@ -35,30 +36,17 @@ function iniciar() {
     document.getElementById('tipotxt').value = "Normal";
 }
 
-/* Assigna les coordenades de posicio del ratoli al area grafica quan es fa click */
+/* Assigna les coordinades de posicio x y del cursor a la pantalla quan es mou el ratoli*/
 function position(event) {
-    posx = event.clientX - 385;
-    posy = event.clientY - 8;
+    posx = Math.round(event.clientX - (ample*0.20416),0);
+    posy = Math.round(event.clientY - (alt*0.008653846));
     //info.innerHTML = "X: " + posx + " Y: " + posy;
-}
-
-/* Assigna al context del canvas el color de linia quan es canvia la seleccio al color picker clin */
-function asigColorLin(event) {
-    ctx.strokeStyle = document.getElementById('clin').value;
-}
-
-/* Assigna al context del canvas el color de farcit quan es canvia la seleccio al color picker cfarcit */
-function asigColorFarcit(event) {
-    resetTextura();
-    ctx.fillStyle = document.getElementById('cfarcit').value;
-    info.innerHTML = "";
-
 }
 
 /* Reseteja les seleccions actuals */
 function reset() {
     queDibuixem = 0;
-    punt1.x = punt2.x = punt1.y = punt2.y = undefined;
+    punt1.x = punt2.x = punt1.y = punt2.y = punt3.x = punt3.y = undefined;
     document.getElementById('tbCostats').value = '';
     document.getElementById('tbGraus').value = '';
     document.getElementById('tbSimetria').value = '';
@@ -66,7 +54,31 @@ function reset() {
     document.getElementById('tbSimetria').hidden = true;
     document.getElementById('tbCostats').hidden = true;
     document.getElementById('tbText').hidden = true;
+    canvasocult = undefined;
+    ctxocult = undefined;
     ctx.restore();
+}
+
+/* Assigna al context del canvas el color de linia quan es canvia la seleccio al 
+   color picker clin */
+function asigColorLin(event) {
+    ctx.strokeStyle = document.getElementById('clin').value;
+}
+
+/* Assigna a totes les imatges del html l'estil de vora per defecte */
+function resetTextura()
+{
+    Array.from(document.getElementsByTagName('img')).forEach(element => {
+        element.style.border = 'thin solid black';
+        element.style.zIndex = 0;
+    });
+}
+
+/* Assigna al context del canvas el color de farcit quan es canvia la seleccio al
+   color picker cfarcit */
+function asigColorFarcit(event) {
+    resetTextura();
+    ctx.fillStyle = document.getElementById('cfarcit').value;
 }
 
 /* Augmenta el gruix de linia quan es prem el botó + */
@@ -116,10 +128,10 @@ function tipolinChanged() {
     info.innerHTML = "";
 }
 
-/* Crida al metode adequat en funcio del estat de seleccio actual i la posicio on es fa click */
+/* Crida al metode adequat en funcio de la posicio on es fa click */
 function mouseClick(event) {
-    //Si no hi ha seleccio i es fa click fora del area grafica
-    if (!queDibuixem || (queDibuixem && posx <= 0) || (queDibuixem && posy > 680)) {
+    //Si es fa click fora del area grafica
+    if (posx <= 0 || posy > alt*0.65) {
         seleccionarOpcio();
     }
     else {
@@ -127,29 +139,79 @@ function mouseClick(event) {
     }
 }
 
-/* Assigna el nombre de opcio a dibuixar en funcio de la posicio on s'hagi fet click a l'area de seleccio */
+/* Assigna el nombre de opcio a dibuixar en funcio de la posicio on s'hagi fet click a l'area
+   de les icones */
 function seleccionarOpcio() {
     reset();
+    let esquerre = ample*-0.1;
+    let saltvertical = alt*0.082;
     document.getElementById("tbCostats").hidden = true;
-    if (posx < -188 && posy < 85) {
+    if (posx < esquerre && posy < saltvertical) {
         info.innerHTML = "Seleccionat Rectangle. Clickeu el punt inicial.";
         queDibuixem = 1; //Rectangle seleccionat
     }
-    else if (posx > -160 && posx < 1 && posy < 90) {
+    else if (posx > esquerre && posx < 1 && posy < saltvertical) {
         info.innerHTML = "Seleccionada El-lipse. Clickeu el punt inicial.";
         queDibuixem = 2; //El-lipse seleccionada
     }
-    else if (posx < -188 && posy > 90 && posy < 180) {
-        info.innerHTML = "Seleccionat Poligon. Introduïu nombre de costats i clickeu posició del vertex superior esquerre.";
+    else if (posx < esquerre && posy > saltvertical && posy < saltvertical * 2) {
+        info.innerHTML = "Seleccionat Poligon. Introduïu nombre de costats i clickeu posició del\
+         vertex superior esquerre.";
         document.getElementById("tbCostats").hidden = false;
         document.getElementById("tbCostats").focus();
         queDibuixem = 3; //Poligon seleccionat
     }
-    else if (posx > -160 && posx < 1 && posy > 90 && posy < 168) {
+    else if (posx > esquerre && posx < 1 && posy > saltvertical && posy < saltvertical*2) {
         info.innerHTML = "Seleccionada línia. Clickeu el punt inicial.";
         queDibuixem = 4; //Linia
     }
-    else if (posx > 378 && posx < 508 && posy > 485) {
+    else if (posx < esquerre && posy > saltvertical*2 && posy < saltvertical * 3) {
+        info.innerHTML = "Seleccionat copia. Clickeu el punt superior esquerre de la finestra a\
+         copiar."
+        queDibuixem = 6; // Copia d'una finestra.
+    }
+    else if (posx > esquerre && posy > saltvertical*2 && posy < saltvertical*3) {
+        info.innerHTML = "Seleccionat escala. Clickeu el punt superior esquerre de la finestra a escalar."
+        queDibuixem = 7; // Escalat d'una finestra.
+    }
+    else if (posx < esquerre && posy > saltvertical * 3 && posy < saltvertical * 4) {
+        document.getElementById("tbGraus").hidden = false;
+        document.getElementById("tbGraus").focus();
+        info.innerHTML = "Seleccionat gir. Introduiu la quantitat de graus i clickeu el punt superior esquerre de la finestra a girar."
+        queDibuixem = 8; // Gir d'una finestra.
+    }
+    else if (posx > esquerre && posx < 1 && posy > saltvertical *3  && posy < saltvertical * 4) {
+        document.getElementById("tbSimetria").hidden = false;
+        document.getElementById("tbSimetria").focus();
+        info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o: v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la finestra."
+        queDibuixem = 9; // Simetria d'una finestra.
+    }
+    else if(posx < esquerre + esquerre/2 && posy > saltvertical * 4 && posy < saltvertical * 6)// Carregar imatge
+    {
+        info.innerHTML = 'Seleccionat carregar imatge';
+        let ocult = document.getElementById('fileElem');
+        ocult.value = null;
+        ocult.click();
+    }
+    else if(posx > esquerre + esquerre/2 && posx < esquerre && posy > saltvertical *4  && posy < saltvertical * 6)//Negatiu
+    {
+        info.innerHTML = "Seleccionat imatge a negatiu. Premeu el punt superior esquerre de la finestra a negativitzar.";
+        queDibuixem = 10; //Negatiu d'una finestra.
+
+    }
+    else if(posx > esquerre && posx < esquerre/2 && posy > saltvertical * 4 && posy < saltvertical * 6)//Escala de grisos
+    {
+        info.innerHTML = "Seleccionat imatge a escala de grisos. Premeu el punt superior esquerre de la finestra a transformar.";
+        queDibuixem = 11; //Escala de grisos d'una finestra.
+
+    }
+    else if(posx > esquerre/2 && posx < 1 && posy > saltvertical*4 && posy < saltvertical * 6)//Difuminat
+    {
+        info.innerHTML = "Seleccionat imatge a difuminar. Premeu el punt superior esquerre de la finestra a transformar.";
+        queDibuixem = 12; //Difuminat d'una finestra.
+
+    }
+    else if (posx > esquerre*-2 && posx < esquerre*-2+(esquerre*-2)/3.5 && posy > saltvertical*8) {
         if (ctx.fillStyle == "#ffffff")
             ctx.fillStyle = "black";
         info.innerHTML = "Seleccionat text. Escriviu el text i clickeu el punt d'inserció.";
@@ -157,81 +219,36 @@ function seleccionarOpcio() {
         document.getElementById('tbText').focus();
         queDibuixem = 5; //Text
     }
-    else if (posx < -188 && posy > 175 && posy < 255) {
-        info.innerHTML = "Seleccionat copia. Clickeu el punt superior esquerre de la finestra a copiar."
-        queDibuixem = 6; // Copia d'una finestra.
-    }
-    else if (posx > -188 && posy > 175 && posy < 255) {
-        info.innerHTML = "Seleccionat escala. Clickeu el punt superior esquerre de la finestra a escalar."
-        queDibuixem = 7; // Escalat d'una finestra.
-    }
-    else if (posx < -188 && posy > 258 && posy < 339) {
-        document.getElementById("tbGraus").hidden = false;
-        document.getElementById("tbGraus").focus();
-        info.innerHTML = "Seleccionat gir. Introduiu la quantitat de graus i clickeu el punt superior esquerre de la finestra a girar."
-        queDibuixem = 8; // Gir d'una finestra.
-    }
-    else if (posx > -188 && posy > 258 && posy < 339) {
-        document.getElementById("tbSimetria").hidden = false;
-        document.getElementById("tbSimetria").focus();
-        info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o: v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la finestra."
-        queDibuixem = 9; // Simetria d'una finestra.
-    }
-    else if(posx < -280 && posy > 340 && posy < 510)// Carregar imatge
-    {
-        info.innerHTML = 'Seleccionat carregar imatge';
-        let ocult = document.getElementById('fileElem');
-        ocult.value = null;
-        ocult.click();
-    }
-    else if(posx > -280 && posx < -185 && posy > 340 && posy < 510)//Negatiu
-    {
-        info.innerHTML = "Seleccionat imatge a negatiu. Premeu el punt superior esquerre de la finestra a negativitzar.";
-        queDibuixem = 10; //Negatiu d'una finestra.
-
-    }
-    else if(posx > -185 && posx < -90 && posy > 340 && posy < 510)//Escala de grisos
-    {
-        info.innerHTML = "Seleccionat imatge a escala de grisos. Premeu el punt superior esquerre de la finestra a transformar.";
-        queDibuixem = 11; //Escala de grisos d'una finestra.
-
-    }
-    else if(posx > -90 && posx < 0 && posy > 340 && posy < 510)//Difuminat
-    {
-        info.innerHTML = "Seleccionat imatge a difuminar. Premeu el punt superior esquerre de la finestra a transformar.";
-        queDibuixem = 12; //Difuminat d'una finestra.
-
-    }
-    else if(posx > 759 && posy > 710) // Textura
+    else if(posx > esquerre * -3.95 && posy > saltvertical * 8 && posy < saltvertical * 10) // Textura
     {
         resetTextura();
         info.innerHTML = "Seleccionada textura";
-        if (posx > 760 && posx < 885 && posy > 710 && posy < 795) {
+        if (posx < esquerre * -4.65 ) {
             document.getElementById("maons").style.border = 'thick solid red';
             document.getElementById("maons").style.zIndex = 1;
             setTextura('Textures/maons.jpg');
         }
-        else if (posx > 885 && posx < 1010 && posy > 710 && posy < 795) {
+        else if (posx > esquerre * -4.65 && posx < esquerre * -5.3) {
             document.getElementById("pedres").style.border = 'thick solid red';
             document.getElementById("pedres").style.zIndex = 1;
             setTextura('Textures/pedres.jpg');
         }
-        else if (posx > 1010 && posx < 1140 && posy > 710 && posy < 795) {
+        else if (posx > esquerre * -5.3 && posx < esquerre * -5.95) {
             document.getElementById("terra").style.border = 'thick solid red';
             document.getElementById("terra").style.zIndex = 1;
             setTextura('Textures/terra.jpg');
         }
-        else if (posx > 1140 && posx < 1265 && posy > 710 && posy < 795) {
+        else if (posx > esquerre * -5.95 && posx < esquerre * -6.6) {
             document.getElementById("titani").style.border = 'thick solid red';
             document.getElementById("titani").style.zIndex = 1;
             setTextura('Textures/titani.jpg');
         }
-        else if (posx > 1265 && posx < 1390 && posy > 710 && posy < 795) {
+        else if (posx > esquerre * -6.6 && posx < esquerre * -7.25) {
             document.getElementById("fulla").style.border = 'thick solid red';
             document.getElementById("fulla").style.zIndex = 1;
             setTextura('Textures/fulla.jpg');
         }
-        else if (posx > 1390 && posy > 710 && posy < 795) {
+        else if (posx > esquerre * -7.25) {
             document.getElementById("petra").style.border = 'thick solid red';
             document.getElementById("petra").style.zIndex = 1;
             setTextura('Textures/petra.jpg');
@@ -243,22 +260,24 @@ function seleccionarOpcio() {
 
 /* En funcio de la opcio abans seleccionada, obté els punts inicial i final i crida al metode per a 
    dibuixar l'element */
-function aplicaOpcio() {
+function aplicaOpcio() {    
+    if(queDibuixem == 0)
+        return;
     switch (queDibuixem) {
         case 1://Rectangle
-            if (posx > 0 && posy < 680 && punt1.x == undefined)// Click en area grafica
+            if (punt1.x == undefined)
             {
                 asigPunt1();
                 info.innerHTML = "Clickeu el punt final.";
             }
-            else if (punt1.x && !punt2.x && posx > 0 && posy < 680) {
+            else if (punt1.x && !punt2.x) { 
                 asigPunt2();
                 drawRectangle();
                 info.innerHTML = "Dibuixat rectangle.";
             }
             break;
         case 2://Elipse
-            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            if (punt1.x == undefined)// Click en area grafica
             {
                 asigPunt1();
                 info.innerHTML = "Clickeu el punt final.";
@@ -270,7 +289,7 @@ function aplicaOpcio() {
             }
             break;
         case 3://Poligon
-            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            if (punt1.x == undefined)// Click en area grafica
             {
                 if (costats == 0) {
                     alert("Quantitat de costats no introduida.Introduïu-la primer.")
@@ -287,7 +306,7 @@ function aplicaOpcio() {
             }
             break;
         case 4://Linia
-            if (posx > 0 && punt1.x == undefined)// Click en area grafica
+            if (punt1.x == undefined)// Click en area grafica
             {
                 asigPunt1();
                 info.innerHTML = "Clickeu el punt final de la línia.";
@@ -307,8 +326,7 @@ function aplicaOpcio() {
                 ctx.fillText(texto, punt1.x, punt1.y);
                 info.innerHTML = "Dibuixat text";
                 document.getElementById('tbText').value = '';
-                document.getElementById('tbText').hidden = true;
-                reset();
+                document.getElementById('tbText').hidden = true;                
             }
             break;
         case 6://Copia d'una finestra
@@ -324,8 +342,7 @@ function aplicaOpcio() {
             else if (punt1.x && punt2.x && !punt3.x) {
                 asigPunt3();
                 copiaFinestra();                
-                info.innerHTML = "Finestra copiada.";
-                reset();
+                info.innerHTML = "Finestra copiada.";                
             }
             break;
         case 7://Escala una finestra
@@ -337,8 +354,7 @@ function aplicaOpcio() {
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
                 escalaFinestra();
-                info.innerHTML = "Finestra escalada al doble.";
-                reset();
+                info.innerHTML = "Finestra escalada al doble.";                
             }
             break
         case 8: //Gir d'una finestra
@@ -354,10 +370,8 @@ function aplicaOpcio() {
             }
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
-                //copiaFinestra();
                 giraFinestra();
-                info.innerHTML = "Finestra girada.";
-                reset();
+                info.innerHTML = "Finestra girada.";                
             }
             break
         case 9: //Simetria d'una finestra
@@ -374,8 +388,7 @@ function aplicaOpcio() {
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
                 simetriaFinestra();
-                info.innerHTML = "Simetria feta.";
-                reset();
+                info.innerHTML = "Simetria feta.";                
             }
             break
         case 10: //Negatiu d'una finestra
@@ -387,8 +400,7 @@ function aplicaOpcio() {
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
                 negatiuFinestra();
-                info.innerHTML = "Negatiu fet.";
-                reset();
+                info.innerHTML = "Negatiu fet.";                
             }
             break
         case 11: //Escala de grisos d'una finestra
@@ -400,8 +412,7 @@ function aplicaOpcio() {
             else if (punt1.x && !punt2.x) {
                 asigPunt2();
                 grisosFinestra();
-                info.innerHTML = "Imatge transformada.";
-                reset();
+                info.innerHTML = "Imatge transformada.";        
             }
             break
         case 12: //Difuminat d'una finestra
@@ -414,7 +425,6 @@ function aplicaOpcio() {
                 asigPunt2();
                 difuminatFinestra();
                 info.innerHTML = "Imatge transformada.";                
-                reset();
             }
             break
     }
@@ -431,7 +441,7 @@ function asigPunt2() {
     punt2.y = posy;
 }
 
-/* Assigna les coordenades del punt final del element a dibuixar */
+/* Assigna les coordenades del punt d'insercio del element a dibuixar */
 function asigPunt3() {
     punt3.x = posx;
     punt3.y = posy;
@@ -444,7 +454,8 @@ function drawRectangle() {
     reset();
 }
 
-/* Dibuixa una el-lipse tangent al rectangle format amb els punts superior esquerre i inferior dret */
+/* Dibuixa una el-lipse tangent al rectangle format amb els punts superior esquerre i
+   inferior dret */
 function drawElipse() {
     let start = 0;
     let end = 2 * Math.PI; // 360 grads
@@ -470,11 +481,8 @@ function drawElipse() {
 /* Dibuixa un poligon de n costats amb el vertex superior esquerre al primer punt clicat
    i un llarg de costat segons la distancia entre el primer punt i el segon clicat */
 function drawPoligon() {
-    let nombrecostats = costats;
-    let angle = 2 * Math.PI / nombrecostats;
+    let angle = 2 * Math.PI / costats;
     let costat = Math.sqrt(Math.pow(punt2.x - punt1.x, 2) + Math.pow(punt2.y - punt1.y, 2));
-    ctx.save();
-    ctx.translate(0, 0);
     let anterior = new Object();
     anterior.x = punt1.x;
     anterior.y = punt1.y;
@@ -482,7 +490,7 @@ function drawPoligon() {
     ctx.moveTo(punt1.x, punt1.y);
     let vector = { i: 1, j: 0 }; // Vector de direccció inicial
     let angleacumulat = angle;
-    for (let i = 1; i < nombrecostats; i++) {
+    for (let i = 1; i < costats; i++) {
         let seguent = new Object();
         seguent.x = anterior.x + vector.i * costat;
         seguent.y = anterior.y + vector.j * costat;
@@ -494,10 +502,8 @@ function drawPoligon() {
     ctx.closePath();
     ctx.stroke();
     ctx.fill();
-    reset();
-    document.getElementById('tbCostats').value = '';
     costats = 0;
-    ctx.restore();
+    reset();
 }
 
 /* Retorna un vector de direccio ( unitari ) en funcio del angle passat com a argument */
@@ -510,15 +516,15 @@ function calcularVector(angle) {
     }
     else if (Math.PI / 2 < angle < Math.PI) //Angle mes gran de 90º i menor de 180º
     {
-        let complementario = Math.PI - angle;
-        vector.i = -Math.cos(complementario);
-        vector.j = Math.sin(complementario);
+        let complementari = Math.PI - angle;
+        vector.i = -Math.cos(complementari);
+        vector.j = Math.sin(complementari);
     }
     else if (Math.PI < angle < Math.PI * 3 / 2) // Angle mes gran de 180º i menor a 270º
     {
-        let complementario = (Math.PI * 3 / 2) - angle;
-        vector.i = -Math.sin(complementario);
-        vector.j = -Math.cos(complementario);
+        let complementari = (Math.PI * 3 / 2) - angle;
+        vector.i = -Math.sin(complementari);
+        vector.j = -Math.cos(complementari);
     }
     else if (angle > Math.PI * 3 / 2) // Angle mes gran de 270º
     {
@@ -530,7 +536,6 @@ function calcularVector(angle) {
 
 /* Comproba que s'introdueix un nombre correcte de costats per a dibuixar un poligon */
 function checkEnter(e) {
-
     if (e.key === 'Enter' || e.keyCode === 13) {
         let ncostats = document.getElementById('tbCostats').value;
         if (isNaN(ncostats) || ncostats < 3)
@@ -541,6 +546,7 @@ function checkEnter(e) {
         }
     }
 }
+
 /* Comproba que s'introdueix un nombre correcte de graus per a fer el gir i converteix de graus decimals a radians */
 function checkGraus(e) {
 
@@ -556,13 +562,11 @@ function checkGraus(e) {
 }
 
 function checkSimetria(e) {
-
     if (e.key === 'Enter' || e.keyCode === 13) {
         sim = document.getElementById('tbSimetria').value;
         if (sim != 'h' && sim != 'H' && sim != 'v' && sim != 'V')
             alert("Valor invalid. Si us plau introduïu: h o H per a simetria horitzontal, y v o V per simetria vertical.");
         else {
-            direcciosimetria = sim;
             document.getElementById('tbSimetria').hidden = true;
         }
     }
@@ -577,7 +581,8 @@ function drawLinia() {
     ctx.stroke();
     reset();
 }
-
+/* Inicialitza afegeix un element Canvas auxiliar al html amb la amplada i alçada corresponent
+    a la distancia entre el punt1 i el punt2 */
 function setCanvasOcult()
 {
     canvasocult = document.createElement('canvas');
@@ -591,8 +596,10 @@ function setCanvasOcult()
 function copiaFinestra() {
     setCanvasOcult();
     // Extreure una imatge de la finestra de seleccio al canvas original
-    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, 
+        canvasocult.width, canvasocult.height);
     ctx.drawImage(canvasocult,punt3.x,punt3.y);
+    reset();
 }
 
 
@@ -654,14 +661,6 @@ function setTextura(rutaimage)
     img.src = rutaimage;
     let pattern = ctx.createPattern(img,'repeat');
     ctx.fillStyle = pattern;
-}
-
-function resetTextura()
-{
-    Array.from(document.getElementsByTagName('img')).forEach(element => {
-        element.style.border = 'thin solid black';
-        element.style.zIndex = 0;
-    });
 }
 
 function insertarImatge(event)

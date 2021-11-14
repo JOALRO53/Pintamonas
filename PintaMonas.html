@@ -4,43 +4,43 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Pintamones</title>
     <link href="estil.css" rel="stylesheet" type="text/css"/>
     <script language="javascript" type="text/javascript" src="metodes.js"></script>
 </head>
 <body onmousemove="position(event);" onclick="mouseClick(event);" onload="iniciar();">
     <div class="container">
-        <div class="Formes">
+        <div class="Formes">            
                 <img class="imagerect" src="images/rectangle.jpeg">
                 <img class="imagecir" src="images/elipse.jpeg">
                 <img class="imagepol" src="images/poligono.jpg">
-                <img class="imagetri" src="images/linia.jpg">
+                <img class="imagetri" src="images/linia.jpg">            
         </div>
-        <div class="Transformacions">
+        <div class="Transformacions">            
             <img class="imagecopiar" src='images/copiar.jpg'>
             <img class="imageEscala" src='images/escala.jpg'>
             <img class="imageRotar" src='images/rotar.jpg'>
-            <img class="imageSim" src="images/simetria.png">
+            <img class="imageSim" src="images/simetria.png">            
         </div>
-        <div class="Imatges">
+        <div class="Imatges">            
             <img class="carregaimg" src='images/carregaimg.png'>
             <img class="imgnegatiu" src='images/imgnegatiu.jpg'>
             <img class="imggrisos" src='images/escalagrisos.jpg'>
-            <img class="difuminat" src='images/difuminat.jpeg'>
+            <img class="difuminat" src='images/difuminat.jpeg'>            
         </div>
-        <div class="TipusLinia">
+        <div class="TipusLinia">            
             <label class='retol'>Tipus linia: </label>
             <select id="tipolin" onchange="tipolinChanged();">
                 <option>Continua</option>
                 <option>Discontinua</option>
                 <option>Linia punt</option>
-            </select>
+            </select>            
         </div>
-        <div class="GruixLinia">
+        <div class="GruixLinia">            
             <label class='retol'>Gruix linia: </label>
             <label id="lbGruix" class="retol"></label>
             <button id="btmes" onclick="incrementGl();">+</button>
-            <button id="btmes" onclick="decrementGl();">-</button>
+            <button id="btmnys" onclick="decrementGl();">-</button>            
         </div>
         <div class="ColorLinia"> 
            <input class="ColorPicker" type="color" id="clin" value="#000000" onchange="asigColorLin(event);">
@@ -78,7 +78,7 @@
             <canvas id="lienzo" width="1526" height="880"></canvas>    
         </div>
     </div>
-    <div>
+    <div id="info">
         <label id="lbInfo"></label>
         <input type="text" id="tbCostats" hidden="true">
         <input type="text" id="tbText" hidden="true">
