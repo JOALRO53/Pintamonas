@@ -56,6 +56,8 @@ function reset() {
     document.getElementById('tbText').hidden = true;
     canvasocult = undefined;
     ctxocult = undefined;
+    graus = 0;
+    sim = '';
     ctx.restore();
 }
 
@@ -171,23 +173,28 @@ function seleccionarOpcio() {
         queDibuixem = 6; // Copia d'una finestra.
     }
     else if (posx > esquerre && posy > saltvertical*2 && posy < saltvertical*3) {
-        info.innerHTML = "Seleccionat escala. Clickeu el punt superior esquerre de la finestra a escalar."
+        info.innerHTML = "Seleccionat escala. Clickeu el punt superior esquerre de la finestra a\
+         escalar."
         queDibuixem = 7; // Escalat d'una finestra.
     }
     else if (posx < esquerre && posy > saltvertical * 3 && posy < saltvertical * 4) {
         document.getElementById("tbGraus").hidden = false;
         document.getElementById("tbGraus").focus();
-        info.innerHTML = "Seleccionat gir. Introduiu la quantitat de graus i clickeu el punt superior esquerre de la finestra a girar."
+        info.innerHTML = "Seleccionat gir. Introduiu la quantitat de graus i clickeu el punt \
+        superior esquerre de la finestra a girar."
         queDibuixem = 8; // Gir d'una finestra.
     }
     else if (posx > esquerre && posx < 1 && posy > saltvertical *3  && posy < saltvertical * 4) {
         document.getElementById("tbSimetria").hidden = false;
         document.getElementById("tbSimetria").focus();
-        info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o: v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la finestra."
+        info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o:\
+         v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la\
+          finestra."
         queDibuixem = 9; // Simetria d'una finestra.
     }
     else if(posx < esquerre + esquerre/2 && posy > saltvertical * 4 && posy < saltvertical * 6)// Carregar imatge
     {
+        //Carregar imatge
         info.innerHTML = 'Seleccionat carregar imatge';
         let ocult = document.getElementById('fileElem');
         ocult.value = null;
@@ -547,7 +554,8 @@ function checkEnter(e) {
     }
 }
 
-/* Comproba que s'introdueix un nombre correcte de graus per a fer el gir i converteix de graus decimals a radians */
+/* Comproba que s'introdueix un nombre correcte de graus per a fer el gir i converteix de graus
+   decimals a radians */
 function checkGraus(e) {
 
     if (e.key === 'Enter' || e.keyCode === 13) {
@@ -563,10 +571,12 @@ function checkGraus(e) {
 
 function checkSimetria(e) {
     if (e.key === 'Enter' || e.keyCode === 13) {
-        sim = document.getElementById('tbSimetria').value;
-        if (sim != 'h' && sim != 'H' && sim != 'v' && sim != 'V')
-            alert("Valor invalid. Si us plau introduïu: h o H per a simetria horitzontal, y v o V per simetria vertical.");
+        let simdir = document.getElementById('tbSimetria').value;
+        if (simdir != 'h' && simdir != 'H' && simdir != 'v' && simdir != 'V')
+            alert("Valor invalid. Si us plau introduïu: h o H per a simetria horitzontal, y v o\
+             V per simetria vertical.");
         else {
+            sim = simdir;
             document.getElementById('tbSimetria').hidden = true;
         }
     }
@@ -602,34 +612,37 @@ function copiaFinestra() {
     reset();
 }
 
-
+/* Escala al doble el contingut de la finestra entre el punt1 i el punt2 */
 function escalaFinestra() {
     setCanvasOcult();
     canvasocult.width = (punt2.x - punt1.x) * 2;
     canvasocult.height = (punt2.y - punt1.y) * 2;
-    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, 
+        canvasocult.width, canvasocult.height);
     ctx.clearRect(punt1.x, punt1.y, canvasocult.width, canvasocult.height);
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
+    reset();
 }
 
+/* Gira el contingut d'una finestra */
 function giraFinestra()
 {
     // Establir un nou canvas invisible el doble de gran que la finestra seleccionada
     setCanvasOcult();
     canvasocult.width = (punt2.x - punt1.x)*2;
     canvasocult.height = (punt2.y - punt1.y)*2;
-    //let ctxocult = canvasocult.getContext('2d');
     // Establir el context del canvas ocult amb escala la meitat i traslladar el punt origen
     ctxocult.scale(0.5,0.5);
     ctxocult.translate(canvasocult.width*Math.sin(graus),0);
     // Rotar el context del canvas ocult la quantitat de graus desitjada i dibuixar una imatge
     // extreta del canvas original del tamany de la finestra de selecció
     ctxocult.rotate(graus);
-    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0,
+         canvasocult.width, canvasocult.height);
     // Esborrar el dibuix contingut a la finestra de seleccio i afegir el dibuix en el canvas ocult
     ctx.clearRect(punt1.x, punt1.y, (punt2.x - punt1.x), (punt2.y - punt1.y));
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
-    graus = 0;
+    reset();
 }
 
 function simetriaFinestra()
@@ -637,7 +650,8 @@ function simetriaFinestra()
   // Establir un nou canvas invisible el doble de gran que la finestra seleccionada
   setCanvasOcult();
   // Extreure una imatge de la finestra de seleccio al canvas original
-  ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+  ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, 
+    canvasocult.width, canvasocult.height);
   // Voltejar el canvas horitzontal o verticalment, esborrar el dibuix contingut a la finestra
   // de seleccio i afegir el dibuix en el canvas ocult voltejat.
   ctx.save();
@@ -652,7 +666,7 @@ function simetriaFinestra()
   }
   ctx.drawImage(canvasocult, punt1.x, punt1.y);
   ctx.restore();
-  sim = '';
+  reset();
 }
 
 function setTextura(rutaimage)
@@ -663,6 +677,8 @@ function setTextura(rutaimage)
     ctx.fillStyle = pattern;
 }
 
+/* Carrega el fitxer d'imatge seleccionat en el quadre de dialog del element input file i el dibuixa en el
+   canvas */
 function insertarImatge(event)
 {
     var input = event.target;
