@@ -1,5 +1,5 @@
 #lbInfo{
-    font-size:1.8em;
+    font-size:1.5em;
     font-weight: bold;
 }
 
@@ -153,7 +153,8 @@
     background-color:lightgreen;
 }
 
-#btmes,#btmesf,#btmnysf
+/*#btmes,#btmesf,#btmnysf*/
+button
 {
     display: inline;
     width:13%;

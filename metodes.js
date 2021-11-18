@@ -59,6 +59,7 @@ function reset() {
     graus = 0;
     sim = '';
     ctx.restore();
+    document.getElementById("lbInfo").style.fontSize = "1.5em";
 }
 
 /* Assigna al context del canvas el color de linia quan es canvia la seleccio al 
@@ -187,6 +188,7 @@ function seleccionarOpcio() {
     else if (posx > esquerre && posx < 1 && posy > saltvertical *3  && posy < saltvertical * 4) {
         document.getElementById("tbSimetria").hidden = false;
         document.getElementById("tbSimetria").focus();
+        document.getElementById("lbInfo").style.fontSize = "1.2em";
         info.innerHTML = "Seleccionada simetria. Introduiu: h o H per a simetria horitzontal, o:\
          v o V per a simetria vertical. Després, seleccioneu el punt superior esquerre de la\
           finestra."
@@ -200,21 +202,25 @@ function seleccionarOpcio() {
         ocult.value = null;
         ocult.click();
     }
-    else if(posx > esquerre + esquerre/2 && posx < esquerre && posy > saltvertical *4  && posy < saltvertical * 6)//Negatiu
+    else if(posx > esquerre + esquerre/2 && posx < esquerre && posy > saltvertical *4  &&
+         posy < saltvertical * 6)//Negatiu d'una finestra.
     {
-        info.innerHTML = "Seleccionat imatge a negatiu. Premeu el punt superior esquerre de la finestra a negativitzar.";
-        queDibuixem = 10; //Negatiu d'una finestra.
+        info.innerHTML = "Seleccionat imatge a negatiu. Premeu el punt superior esquerre de la finestra a\
+         negativitzar.";
+        queDibuixem = 10; 
 
     }
     else if(posx > esquerre && posx < esquerre/2 && posy > saltvertical * 4 && posy < saltvertical * 6)//Escala de grisos
     {
-        info.innerHTML = "Seleccionat imatge a escala de grisos. Premeu el punt superior esquerre de la finestra a transformar.";
+        info.innerHTML = "Seleccionat imatge a escala de grisos. Premeu el punt superior esquerre de la\
+         finestra a transformar.";
         queDibuixem = 11; //Escala de grisos d'una finestra.
 
     }
     else if(posx > esquerre/2 && posx < 1 && posy > saltvertical*4 && posy < saltvertical * 6)//Difuminat
     {
-        info.innerHTML = "Seleccionat imatge a difuminar. Premeu el punt superior esquerre de la finestra a transformar.";
+        info.innerHTML = "Seleccionat imatge a difuminar. Premeu el punt superior esquerre de la finestra a\
+         transformar.";
         queDibuixem = 12; //Difuminat d'una finestra.
 
     }
@@ -669,6 +675,7 @@ function simetriaFinestra()
   reset();
 }
 
+/* Estableix la imatge amb la ruta pasada com a argument com a farcit del context del canvas */
 function setTextura(rutaimage)
 {
     let img = new Image();
@@ -690,64 +697,70 @@ function insertarImatge(event)
         imag.width = 500;
         imag.height = 400;
         imag.onload = ()=>{
-        ctx.drawImage(imag,0,0,500,400,10,5,500,400);
+        ctx.drawImage(imag,0,0,500,400,((ample-ample*0.20416)/2)-125,((alt*0,656)/2)-100,500,400);
         }
     };
     reader.readAsDataURL(input.files[0]);
 }
 
+/* Genera el negatiu de la imatge continguda en una finestra */
 function negatiuFinestra()
 {
     setCanvasOcult();
-    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, 
+        canvasocult.width, canvasocult.height);
     let imageData = ctxocult.getImageData(0, 0, canvasocult.width,canvasocult.height);
     let pixels = imageData.data;
     for (var i = 0; i < pixels.length; i += 4) 
     {
-    pixels[i]= 255 - pixels[i];// red
-    pixels[i+1] = 255 - pixels[i+1]; // green
-    pixels[i+2] = 255 - pixels[i+2]; // blue
+        pixels[i]= 255 - pixels[i];// red
+        pixels[i+1] = 255 - pixels[i+1]; // green
+        pixels[i+2] = 255 - pixels[i+2]; // blue
     }
     ctxocult.putImageData(imageData,0,0);
     // modifiquem original
     ctx.clearRect(punt1.x,punt1.y,punt2.x - punt1.x, punt2.y - punt1.y);
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
+    reset();
 }
 
 function grisosFinestra()
 {
     setCanvasOcult();
-    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0,
+         canvasocult.width, canvasocult.height);
     let imageData = ctxocult.getImageData(0, 0, canvasocult.width,canvasocult.height);
     let pixels = imageData.data;
-    
+    //Calcular la mitjana entre els tres components de cada pixel i assignar el resultat a cada component
+    // per a homogeneitzar la imatge en tons de gris
     for(var i = 0; i < pixels.length; i += 4) {
         let grayscale= pixels[i]+pixels[i+1]+pixels[i+2]/3;
         pixels[i]=grayscale;
         pixels[i+1]=grayscale;
         pixels[i+2]=grayscale;
       }
-
-    let imgData2=ctxocult.getImageData(0,0,canvasocult.width,canvasocult.height);
-    let data2=imgData2.data;
-    
-    for(var i = 0; i < data2.length; i += 4) {
-        let grayscale= 0.33*data2[i]+0.5*data2[i+1]+0.15*data2[i+2];
-        data2[i]=grayscale;
-        data2[i+1]=grayscale;
-        data2[i+2]=grayscale;
+    // Reduir la tonalitat un 2% per a accentuar el contrast
+    imageData=ctxocult.getImageData(0,0,canvasocult.width,canvasocult.height);
+    pixels=imageData.data;
+    for(var i = 0; i < pixels.length; i += 4) {
+       let grayscale= 0.33*pixels[i]+0.5*pixels[i+1]+0.15*pixels[i+2];
+        pixels[i]=grayscale;
+        pixels[i+1]=grayscale;
+        pixels[i+2]=grayscale;
       }
-
-    ctxocult.putImageData(imgData2,0,0);
+    ctxocult.putImageData(imageData,0,0);
     // modifiquem original
     ctx.clearRect(punt1.x,punt1.y,punt2.x - punt1.x, punt2.y - punt1.y);
     ctx.drawImage(canvasocult, punt1.x, punt1.y);
+    reset();
 }
 
+/* Difumina el contingut d'una finestra */
 function difuminatFinestra() {
     setCanvasOcult();
     ctxocult.globalAlpha = 0.125;
-    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, canvasocult.width, canvasocult.height);
+    ctxocult.drawImage(canvas, punt1.x, punt1.y, punt2.x - punt1.x, punt2.y - punt1.y, 0, 0, 
+        canvasocult.width, canvasocult.height);
     for (y = -1; y < 3; y++) {
         for (x = -1; x < 3; x++) {
             ctxocult.drawImage(canvasocult, x, y);
@@ -756,3 +769,5 @@ function difuminatFinestra() {
     ctx.clearRect(punt1.x,punt1.y,punt2.x-punt1.x,punt2.y-punt2.y);
     ctx.drawImage(canvasocult,punt1.x,punt1.y);
   }
+
+

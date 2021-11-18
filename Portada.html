@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portada de Pintamones</title>
+    <h1>Portada de l'aplicació Pintamones</h1>
+    <link href="estilp.css" rel="stylesheet" type="text/css"/>
+    <script language="javascript" type="text/javascript" src="Portada.js"></script>
+</head>
+<body onload="iniciar()">
+    <a id="manual" href="Manual-Pintamones.pdf">Manual</a>
+    <a id="inici" href="PintaMonas.html">Iniciar Pintamones</a><br>
+    <video id="videoPlayer" style="width:70%;height:auto;" ontimeupdate="mostraTemps()"> 
+        <source src="Video_Pintamones.mp4" type='video/mp4;codecs="mp4a.40.2'>
+    </video>
+    <button id="btPlay" onclick="playPause()">Reproduir/Pausar</button>
+    <button id="btStop" onclick="reiniciar()">Stop</button>
+    <input type="range" min="1" max="100" value="0" class="slider" id="myRange" onchange="tempsChanged()">
+    <label id="lbTemps">0</label>
+</body>
+</html>
